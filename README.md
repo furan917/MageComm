@@ -20,6 +20,8 @@ Download the latest release from the [releases page](https://github.com/furan917
 
 example config.yml:
 ```
+max_operational_cpu_limit: 80
+max_operational_memory_limit: 80
 environment: dev
 listener_engine: sqs
 sqs_aws_region: eu-west-1
@@ -75,6 +77,8 @@ e.g
 The tool can be configured using a yaml file at `/etc/magecomm/config.yml`(unix) / `%APPDATA%\magecomm\config.yml`(windows)  or by environment variables.
 lowercase for yml, uppercase for ENV
 
+- `MAX_OPERATIONAL_CPU_LIMIT`: Maximum CPU limit of system before we defer processing messages, default: 80
+- `MAX_OPERATIONAL_MEMORY_LIMIT`: Maximum memory limit of system before we defer processing messages, default: 80
 - `ENVIRONMENT`: the environment scope the tool is to work in, Default `default`
 - `LISTENERS`: Comma-separated list of queues to listen to
 - `LISTENER_ENGINE`: Listener engine to use (sqs/rmq), default: sqs
