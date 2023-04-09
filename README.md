@@ -45,7 +45,10 @@ allowed_magerun_commands:
 
 - `--debug`: Enable debug mode
 
-e.g `magecomm --debug listen`
+e.g  
+`magecomm --debug listen`  
+`magecomm --debug magerun cache:clean`
+`magecomm --debug cat path/to/archive.tar.gz /path/to/file.txt`
 
 ### Commands
 
