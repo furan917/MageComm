@@ -9,26 +9,30 @@ import (
 )
 
 const (
-	CommandConfigEnvironment            = "environment"
-	CommandConfigListenerEngine         = "listener_engine"
-	CommandConfigListeners              = "listeners"
-	CommandConfigAllowedMageRunCommands = "allowed_magerun_commands"
+	CommandConfigMaxOperationalCpuLimit    = "max_operational_cpu_limit"
+	CommandConfigMaxOperationalMemoryLimit = "max_operational_memory_limit"
+	CommandConfigEnvironment               = "environment"
+	CommandConfigListenerEngine            = "listener_engine"
+	CommandConfigListeners                 = "listeners"
+	CommandConfigAllowedMageRunCommands    = "allowed_magerun_commands"
 )
 
 func getDefault(key string) string {
 	// we cant use viper.setDefault due to the order of operations we need: Config > Env > Default
 	defaults := map[string]string{
-		CommandConfigEnvironment:            "default",
-		CommandConfigListenerEngine:         "sqs",
-		CommandConfigListeners:              "",
-		CommandConfigAllowedMageRunCommands: "",
-		"sqs_aws_region":                    "eu-west-1",
-		"rmq_host":                          "localhost",
-		"rmq_port":                          "5672",
-		"rmq_user":                          "guest",
-		"rmq_pass":                          "guest",
-		"rmq_vhost":                         "/",
-		"rmq_tls":                           "false",
+		CommandConfigMaxOperationalCpuLimit:    "80",
+		CommandConfigMaxOperationalMemoryLimit: "80",
+		CommandConfigEnvironment:               "default",
+		CommandConfigListenerEngine:            "sqs",
+		CommandConfigListeners:                 "",
+		CommandConfigAllowedMageRunCommands:    "",
+		"sqs_aws_region":                       "eu-west-1",
+		"rmq_host":                             "localhost",
+		"rmq_port":                             "5672",
+		"rmq_user":                             "guest",
+		"rmq_pass":                             "guest",
+		"rmq_vhost":                            "/",
+		"rmq_tls":                              "false",
 	}
 
 	if defaultValue, ok := defaults[key]; ok {
@@ -81,9 +85,10 @@ func getConfigValue(key string) (string, bool) {
 }
 
 func getEnvFallback(key string) (string, bool) {
-	logger.Infof("No config value set for key %s, using fallback ENV, this is less secure as users can manipulate these values", key)
 	value, ok := os.LookupEnv(key)
 	if ok && value != "" {
+		logger.Infof("No config value set for key %s, using fallback ENV, this is less secure as users can manipulate these values", key)
+
 		return value, true
 	}
 	return "", false

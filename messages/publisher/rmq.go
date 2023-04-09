@@ -6,10 +6,13 @@ import (
 	"magecomm/services"
 )
 
-func PublishRmqMessage(queueName string, message string) {
+type RmqPublisher struct{}
+
+func (publisher *RmqPublisher) PublishMessage(message string, queueName string) error {
 	rmqConn, channel, err := services.CreateRmqChannel()
 	if err != nil {
 		logger.Fatalf("Failed to create RabbitMQ channel: %v", err)
+		return err
 	}
 	defer func() {
 		err := rmqConn.Disconnect()
@@ -25,4 +28,5 @@ func PublishRmqMessage(queueName string, message string) {
 	}()
 
 	services.PublishRmqMessage(channel, queueName, []byte(message), amqp.Table{})
+	return nil
 }
