@@ -24,6 +24,7 @@ func main() {
 	rootCmd.AddCommand(cmd.MagerunCmd)
 	rootCmd.AddCommand(cmd.DeployCmd)
 	rootCmd.AddCommand(cmd.CatCmd)
+	rootCmd.AddCommand(cmd.CatDeployCmd)
 
 	rootCmd.PersistentFlags().Bool("debug", false, "Enable debug mode")
 

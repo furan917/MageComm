@@ -97,9 +97,15 @@ e.g
 
 - (WIP) Deploy an archived file to the specified environment
 
+#### `magecomm cat-deploy [filepath]`
+
+- Extract a file from the latest deployed archive and print its contents to stdout.  
+  *Command must have at minimum the `DEPLOY_ARCHIVE_PATH` configured in config file or by ENV to work*
+
 #### `magecomm cat [archive] [filepath]`
 
 - Extract a file from an archive and print its contents to stdout, we read headers to avoid being tricked by incorrect file extensions
+
 
 ## Configuration
 
@@ -114,6 +120,8 @@ lowercase for file based config, uppercase for ENV
 - `ALLOWED_MAGERUN_COMMANDS`: Comma-separated list of magerun commands to allow
 - `SQS_AWS_REGION`: AWS region to use for SQS, default: eu-west-1
 - `ALLOWED_MAGERUN_COMMANDS ` comma separated list of commands allowed to be run, fallback to in-code list
+- `DEPLOY_ARCHIVE_PATH` path to the folder that contains the archives which are deployed, default: `/srv/magecomm/deploy/`
+- `DEPLOY_ARCHIVE_LATEST_FILE` Filename of the latest archive (symlink), default: `latest.tar.gz`, if no value is set then MageComm will pick the latest created archive
 - `RMQ_HOST` Default: `localhost`
 - `RMQ_PORT` Default: `5672`
 - `RMQ_USER` Default: ``
@@ -159,3 +167,6 @@ If using SQS the Pod/Instance this is deployed on must have an IAM role with the
 `magecomm cat path/to/archive.rar /path/to/file.txt`  
 `magecomm cat path/to/archive.7zip /path/to/file.txt`  
 
+
+5. Extract and print the contents of a file from the latest deploy  
+`magecomm cat-deploy /path/to/target/file.txt`  

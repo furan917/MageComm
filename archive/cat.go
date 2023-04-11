@@ -9,6 +9,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"magecomm/logger"
 	"os"
 	"os/exec"
 	"strings"
@@ -23,6 +24,22 @@ const (
 	Bzip2Archive    = "bzip2"
 	SevenZipArchive = "7z"
 )
+
+var SupportedCatArchives = []string{".zip", ".tar", ".gz", ".bz2", ".rar", ".7z", ".xz"}
+
+func CatFileFromDeploy(filePath string) error {
+	deployPath, err := GetLatestDeploy()
+	if err != nil {
+		logger.Fatalf("Failed to get latest deploy, unable to cat file: %s", err)
+	}
+
+	err = CatFileFromArchive(deployPath, filePath)
+	if err != nil {
+		logger.Fatalf("Failed to cat file from deploy: %s", err)
+	}
+
+	return nil
+}
 
 func CatFileFromArchive(archivePath string, filePath string) error {
 	if _, err := os.Stat(archivePath); os.IsNotExist(err) {

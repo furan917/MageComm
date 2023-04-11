@@ -15,6 +15,8 @@ const (
 	CommandConfigListenerEngine            = "listener_engine"
 	CommandConfigListeners                 = "listeners"
 	CommandConfigAllowedMageRunCommands    = "allowed_magerun_commands"
+	CommandConfigDeployArchiveFolder       = "deploy_archive_path"
+	CommandConfigDeployArchiveLatestFile   = "deploy_archive_latest_file"
 )
 
 func getDefault(key string) string {
@@ -26,6 +28,8 @@ func getDefault(key string) string {
 		CommandConfigListenerEngine:            "sqs",
 		CommandConfigListeners:                 "",
 		CommandConfigAllowedMageRunCommands:    "",
+		CommandConfigDeployArchiveFolder:       "/srv/magecomm/deploy/",
+		CommandConfigDeployArchiveLatestFile:   "latest.tar.gz",
 		"sqs_aws_region":                       "eu-west-1",
 		"rmq_host":                             "localhost",
 		"rmq_port":                             "5672",
