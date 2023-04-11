@@ -2,6 +2,7 @@ package listener
 
 import (
 	"context"
+	"errors"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/sqs"
 	"magecomm/logger"
@@ -18,10 +19,18 @@ type SqsListener struct {
 	waitGroup sync.WaitGroup
 }
 
-func (listener *SqsListener) shouldExecutionBeDelayed() {
+func (listener *SqsListener) shouldExecutionBeDelayed() error {
+	totalDeferTime := 0
 	for system_limits.CheckIfOutsideOperationalLimits() {
 		system_limits.SystemLimitCheckSleep()
+		totalDeferTime += int(system_limits.WaitTimeBetweenChecks)
+
+		if totalDeferTime > int(system_limits.MaxDeferralTime) {
+			return errors.New("max deferral time exceeded")
+		}
 	}
+
+	return nil
 }
 
 func (listener *SqsListener) processSqsMessage(message *sqs.Message, sqsClient *sqs.SQS, queueName string, queueURL string) {
@@ -33,7 +42,11 @@ func (listener *SqsListener) processSqsMessage(message *sqs.Message, sqsClient *
 	messageBody := *message.Body
 	logger.Debugf("Message received from", queueName)
 
-	listener.shouldExecutionBeDelayed()
+	err = listener.shouldExecutionBeDelayed()
+	if err != nil {
+		logger.Warnf("Message deferral time exceeded. Dropping hold on the message..")
+		return
+	}
 	if err := handler.HandleReceivedMessage(queueName, messageBody); err != nil {
 		logger.Warnf("Error handling message, could not process command:", messageBody,
 			" retry attempt:", receiveCount, "of 5",

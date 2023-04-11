@@ -4,7 +4,7 @@ MageComm CLI is a command line tool for managing Magento applications and deploy
 
 *It is important to note that the environment configuration/env is important to set if you plan to use this tool in a shared rmq/sqs instance as this will prefix your queues to avoid cross communication*
 
-The tool looks for a configuration file in `/etc/magecomm/config.yml`(unix) / `%APPDATA%\magecomm\config.yml`(windows) and if none found defaults to environment variables, then fallback to default values.
+The tool looks for a configuration file in `/etc/magecomm/`(unix) / `%APPDATA%\magecomm\`(windows) `config.yml|config.json` and if none found defaults to environment variables, then fallback to default values.
 
 ## Beta
 Currently this tool is in beta, and is not recommended for production use.
@@ -13,7 +13,8 @@ Tested commands: RMQ based magerun command publishing, message listening, cat al
 
 ## Installation
 
-Install with binary and create configuration file in `/etc/magecomm/config.yml`(unix) / `%APPDATA%\magecomm\config.yml`(windows) or fallback to environment variables:  
+Install with binary and create configuration file in `/etc/magecomm/`(unix) / `%APPDATA%\magecomm\`(windows) or fallback to environment variables.
+config file can be in yaml or json format e.g `config.yml` or `config.json`
 **WARNING: environment variables are not secure and can be easily read/modified by *any* user**
 
 Download the latest release from the [releases page](https://github.com/furan917/magecomm/releases) for your platform and extract to a directory in your PATH.
@@ -41,6 +42,33 @@ allowed_magerun_commands:
   ...etc
 ```
 
+example config.json:
+```
+{
+  "max_operational_cpu_limit": 80,
+  "max_operational_memory_limit": 80,
+  "environment": "dev",
+  "listener_engine": "sqs",
+  "sqs_aws_region": "eu-west-1",
+  "rmq_tls": false,
+  "rmq_user": "guest",
+  "rmq_pass": "guest",
+  "rmq_host": "localhost",
+  "rmq_port": 5672,
+  "rmq_vhost": "/",
+  "listeners": [
+    "magerun",
+    "deploy"
+  ],
+  "allowed_magerun_commands": [
+    "cache:clean",
+    "cache:flush",
+    "setup:static-content:deploy"
+  ],
+  ...etc
+}
+```
+
 ## Usage
 
 ### Global Flags
@@ -49,7 +77,7 @@ allowed_magerun_commands:
 
 e.g  
 `magecomm --debug listen`  
-`magecomm --debug magerun cache:clean`
+`magecomm --debug magerun cache:clean`  
 `magecomm --debug cat path/to/archive.tar.gz /path/to/file.txt`
 
 ### Commands
@@ -74,8 +102,8 @@ e.g
 
 ## Configuration
 
-The tool can be configured using a yaml file at `/etc/magecomm/config.yml`(unix) / `%APPDATA%\magecomm\config.yml`(windows)  or by environment variables.
-lowercase for yml, uppercase for ENV
+The tool can be configured using a yaml or json config file at `/etc/magecomm/`(unix) / `%APPDATA%\magecomm\`(windows)  or by environment variables.
+lowercase for file based config, uppercase for ENV
 
 - `MAX_OPERATIONAL_CPU_LIMIT`: Maximum CPU limit of system before we defer processing messages, default: 80
 - `MAX_OPERATIONAL_MEMORY_LIMIT`: Maximum memory limit of system before we defer processing messages, default: 80

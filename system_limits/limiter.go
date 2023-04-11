@@ -9,7 +9,10 @@ import (
 	"time"
 )
 
-const WaitTimeBetweenChecks = 15 * time.Second
+const (
+	WaitTimeBetweenChecks = 15 * time.Second
+	MaxDeferralTime       = 5 * time.Minute
+)
 
 func CheckIfOutsideOperationalLimits() bool {
 	return isCpuLimitReached() || isMemoryLimitReached()

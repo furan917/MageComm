@@ -1,6 +1,7 @@
 package listener
 
 import (
+	"errors"
 	"github.com/streadway/amqp"
 	"magecomm/logger"
 	"magecomm/messages/handler"
@@ -15,10 +16,18 @@ type RmqListener struct {
 	wg          sync.WaitGroup
 }
 
-func (listener *RmqListener) shouldExecutionBeDelayed() {
+func (listener *RmqListener) shouldExecutionBeDelayed() error {
+	totalDeferTime := 0
 	for system_limits.CheckIfOutsideOperationalLimits() {
 		system_limits.SystemLimitCheckSleep()
+		totalDeferTime += int(system_limits.WaitTimeBetweenChecks)
+
+		if totalDeferTime > int(system_limits.MaxDeferralTime) {
+			return errors.New("max deferral time exceeded")
+		}
 	}
+
+	return nil
 }
 
 func (listener *RmqListener) processRmqMessage(message amqp.Delivery, channel *amqp.Channel, queueName string) {
@@ -28,7 +37,13 @@ func (listener *RmqListener) processRmqMessage(message amqp.Delivery, channel *a
 		retryCount = 0
 	}
 
-	listener.shouldExecutionBeDelayed()
+	err := listener.shouldExecutionBeDelayed()
+	if err != nil {
+		logger.Warnf("Message deferral time exceeded. Dropping hold on the message.")
+		message.Headers["RetryCount"] = retryCount.(int) + 1
+		services.PublishRmqMessage(channel, queueName, message.Body, message.Headers)
+		return
+	}
 	if err := handler.HandleReceivedMessage(queueName, string(message.Body)); err != nil {
 		logger.Warnf("Failed to process message: %v", err)
 		if retryCount.(int) < handler.MessageRetryLimit {
