@@ -22,10 +22,12 @@ Download the latest release from the [releases page](https://github.com/furan917
 
 example config.yml:
 ```
-max_operational_cpu_limit: 80
-max_operational_memory_limit: 80
-environment: dev
-listener_engine: sqs
+magecomm_log_path: /var/log/magecomm.log
+magecomm_log_level: warn
+magecomm_max_operational_cpu_limit: 80
+magecomm_max_operational_memory_limit: 80
+magecomm_environment: dev
+magecomm_listener_engine: sqs
 sqs_aws_region: eu-west-1
 rmq_tls: false
 rmq_user: guest
@@ -33,10 +35,10 @@ rmq_pass: guest
 rmq_host: localhost
 rmq_port: 5672
 rmq_vhost: /
-listeners:
+magecomm_listeners:
   - magerun
   - deploy
-allowed_magerun_commands:
+magecomm_allowed_magerun_commands:
   - cache:clean
   - cache:flush
   - setup:static-content:deploy
@@ -46,10 +48,12 @@ allowed_magerun_commands:
 example config.json:
 ```
 {
-  "max_operational_cpu_limit": 80,
-  "max_operational_memory_limit": 80,
-  "environment": "dev",
-  "listener_engine": "sqs",
+  "magecomm_log_path": /var/log/magecomm.log
+  "magecomm_log_level": warn
+  "magecomm_max_operational_cpu_limit": 80,
+  "magecomm_max_operational_memory_limit": 80,
+  "magecomm_environment": "dev",
+  "magecomm_listener_engine": "sqs",
   "sqs_aws_region": "eu-west-1",
   "rmq_tls": false,
   "rmq_user": "guest",
@@ -57,11 +61,11 @@ example config.json:
   "rmq_host": "localhost",
   "rmq_port": 5672,
   "rmq_vhost": "/",
-  "listeners": [
+  "magecomm_listeners": [
     "magerun",
     "deploy"
   ],
-  "allowed_magerun_commands": [
+  "magecomm_allowed_magerun_commands": [
     "cache:clean",
     "cache:flush",
     "setup:static-content:deploy"
@@ -83,15 +87,15 @@ e.g
 
 ### Commands
 
-#### `magecomm listen [queue1] [queue2] ...`
-
-- Listen for messages from specified queues then handle them appropriately, fallback to config, then ENV LISTENERS
-- Engine (sqs|rmq), default sqs, configured in config or by ENV LISTENER_ENGINE
-
 #### `magecomm magerun`
 
-- A proxy for the magerun command via rmq/sqs with restricted command usage, fallback to config, then ENV LISTENERS
-- Engine (sqs|rmq), default sqs, configured in config or by ENV LISTENER_ENGINE
+- A proxy for the magerun command via rmq/sqs with restricted command usage, allowed commands via `MAGECOMM_ALLOWED_MAGERUN_COMMANDS`
+- Engine (sqs|rmq), default sqs, configured in config or by ENV `MAGECOMM_LISTENER_ENGINE`  
+
+#### `magecomm listen [queue1] [queue2] ...`
+
+- Listen for messages from specified queues then handle them appropriately, fallback to config, then ENV `LISTENERS`
+- Engine (sqs|rmq), default sqs, configured in config or by ENV `MAGECOMM_LISTENER_ENGINE`
 
 #### `magecomm deploy [filepath]`
 
@@ -100,7 +104,7 @@ e.g
 #### `magecomm cat-deploy [filepath]`
 
 - Extract a file from the latest deployed archive and print its contents to stdout.  
-  *Command must have at minimum the `DEPLOY_ARCHIVE_PATH` configured in config file or by ENV to work*
+  *Command must have at minimum the `MAGECOMM_DEPLOY_ARCHIVE_PATH` configured in config file or by ENV to work*
 
 #### `magecomm cat [archive] [filepath]`
 
@@ -112,14 +116,15 @@ e.g
 The tool can be configured using a yaml or json config file at `/etc/magecomm/`(unix) / `%APPDATA%\magecomm\`(windows)  or by environment variables.
 lowercase for file based config, uppercase for ENV
 
-- `MAX_OPERATIONAL_CPU_LIMIT`: Maximum CPU limit of system before we defer processing messages, default: 80
-- `MAX_OPERATIONAL_MEMORY_LIMIT`: Maximum memory limit of system before we defer processing messages, default: 80
-- `ENVIRONMENT`: the environment scope the tool is to work in, Default `default`
-- `LISTENERS`: Comma-separated list of queues to listen to
-- `LISTENER_ENGINE`: Listener engine to use (sqs/rmq), default: sqs
-- `ALLOWED_MAGERUN_COMMANDS`: Comma-separated list of magerun commands to allow
+- `MAGECOMM_LOG_PATH`: Path to log file, default: SYSLOG
+- `MAGECOMM_LOG_LEVEL`: Log level, default: WARN, options (TRACE, DEBUG, INFO, WARN, ERROR, FATAL, PANIC)
+- `MAGECOMM_MAX_OPERATIONAL_CPU_LIMIT`: Maximum CPU limit of system before we defer processing messages, default: 80
+- `MAGECOMM_MAX_OPERATIONAL_MEMORY_LIMIT`: Maximum memory limit of system before we defer processing messages, default: 80
+- `MAGECOMM_ENVIRONMENT`: the environment scope the tool is to work in, Default `default`
+- `MAGECOMM_LISTENERS`: Comma-separated list of queues to listen to
+- `MAGECOMM_LISTENER_ENGINE`: Listener engine to use (sqs/rmq), default: sqs
+- `MAGECOMM_ALLOWED_MAGERUN_COMMANDS ` comma separated list of commands allowed to be run, fallback to in-code list
 - `SQS_AWS_REGION`: AWS region to use for SQS, default: eu-west-1
-- `ALLOWED_MAGERUN_COMMANDS ` comma separated list of commands allowed to be run, fallback to in-code list
 - `DEPLOY_ARCHIVE_PATH` path to the folder that contains the archives which are deployed, default: `/srv/magecomm/deploy/`
 - `DEPLOY_ARCHIVE_LATEST_FILE` Filename of the latest archive (symlink), default: `latest.tar.gz`, if no value is set then MageComm will pick the latest created archive
 - `RMQ_HOST` Default: `localhost`

@@ -8,13 +8,7 @@ import (
 )
 
 const (
-	EngineRabbitMQ      = "rmq"
-	ConfigRabbitMQTLS   = "rmq_tls"
-	ConfigRabbitMQUser  = "rmq_user"
-	ConfigRabbitMQPass  = "rmq_pass"
-	ConfigRabbitMQHost  = "rmq_host"
-	ConfigRabbitMQPort  = "rmq_port"
-	ConfigRabbitMQVhost = "rmq_vhost"
+	EngineRabbitMQ = "rmq"
 )
 
 type RabbitMQConnection struct {
@@ -73,12 +67,12 @@ func PublishRmqMessage(channel *amqp.Channel, queueName string, message []byte, 
 }
 
 func getRabbitMQURL() string {
-	useTLS := config_manager.GetValue(ConfigRabbitMQTLS)
-	user := config_manager.GetValue(ConfigRabbitMQUser)
-	pass := config_manager.GetValue(ConfigRabbitMQPass)
-	host := config_manager.GetValue(ConfigRabbitMQHost)
-	port := config_manager.GetValue(ConfigRabbitMQPort)
-	vhost := config_manager.GetValue(ConfigRabbitMQVhost)
+	useTLS := config_manager.GetValue(config_manager.ConfigRabbitMQTLS)
+	user := config_manager.GetValue(config_manager.ConfigRabbitMQUser)
+	pass := config_manager.GetValue(config_manager.ConfigRabbitMQPass)
+	host := config_manager.GetValue(config_manager.ConfigRabbitMQHost)
+	port := config_manager.GetValue(config_manager.ConfigRabbitMQPort)
+	vhost := config_manager.GetValue(config_manager.ConfigRabbitMQVhost)
 
 	if user == "" || pass == "" {
 		logger.Fatalf("One or more required RabbitMQ environment variables (RMQ_USER, RMQ_PASS) are not set")

@@ -14,7 +14,7 @@ var ListenCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		queueNames := args
 		if len(queueNames) == 0 {
-			queuesFromEnv := config_manager.GetValue("listeners")
+			queuesFromEnv := config_manager.GetValue(config_manager.CommandConfigListeners)
 			if queuesFromEnv == "" {
 				logger.Fatal("No queues specified")
 				return

@@ -11,8 +11,7 @@ import (
 )
 
 const (
-	EngineSQS       = "sqs"
-	ConfigSQSRegion = "sqs_aws_region"
+	EngineSQS = "sqs"
 )
 
 type SQSConnection struct {
@@ -81,7 +80,7 @@ func PublishSqsMessage(sqsClient *sqs.SQS, queueName string, messageBody string)
 
 // Connect to SQS using IAM role
 func (conn *SQSConnection) Connect() error {
-	awsRegion := config_manager.GetValue(ConfigSQSRegion)
+	awsRegion := config_manager.GetValue(config_manager.ConfigSQSRegion)
 
 	sess, err := session.NewSession(&aws.Config{
 		Region: aws.String(awsRegion),

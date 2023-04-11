@@ -61,5 +61,5 @@ func MapPublisherToEngine(queueName string, messageBody string) {
 }
 
 func getEngine() string {
-	return config_manager.GetValue("listener_engine")
+	return config_manager.GetValue(config_manager.CommandConfigListenerEngine)
 }

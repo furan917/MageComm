@@ -4,6 +4,19 @@ package logger
 
 import (
 	"github.com/sirupsen/logrus"
+	"os"
+	"path/filepath"
+	"strings"
+)
+
+const (
+	TraceLevel = logrus.TraceLevel
+	DebugLevel = logrus.DebugLevel
+	InfoLevel  = logrus.InfoLevel
+	WarnLevel  = logrus.WarnLevel
+	ErrorLevel = logrus.ErrorLevel
+	FatalLevel = logrus.FatalLevel
+	PanicLevel = logrus.PanicLevel
 )
 
 var Log *logrus.Logger
@@ -13,12 +26,46 @@ func init() {
 		FullTimestamp: true,
 	})
 	logrus.SetLevel(logrus.WarnLevel)
-
 	Log = logrus.StandardLogger()
 }
 
+func ConfigureLogPath(logFile string) {
+	folderPath := filepath.Dir(logFile)
+	if _, err := os.Stat(folderPath); os.IsNotExist(err) {
+		Log.Fatal("Log target folder does not exist, please contact your system administrator")
+	}
+
+	if _, err := os.Stat(logFile); os.IsNotExist(err) {
+		file, err := os.Create(logFile)
+		if err != nil {
+			Log.Fatal("Unable to create log file, please contact your system administrator")
+		}
+		defer func(file *os.File) {
+			err := file.Close()
+			if err != nil {
+				Log.Fatal("Unable to close log file, please contact your system administrator")
+			}
+		}(file)
+	}
+
+	f, err := os.OpenFile(logFile, os.O_WRONLY|os.O_CREATE, 0755)
+	if err != nil {
+		Log.Fatal("Unable to open log file, please contact your system administrator")
+	}
+	logrus.SetOutput(f)
+}
+
 func EnableDebugMode() {
-	logrus.SetLevel(logrus.DebugLevel)
+	SetLogLevel(logrus.DebugLevel.String())
+}
+
+func SetLogLevel(level string) {
+	logrusLevel, err := logrus.ParseLevel(strings.ToLower(level))
+	if err != nil {
+		logrus.Warnf("Invalid log level: %s, defaulting to %s", level, logrus.WarnLevel.String())
+	}
+
+	logrus.SetLevel(logrusLevel)
 }
 
 func Trace(args ...interface{}) {
