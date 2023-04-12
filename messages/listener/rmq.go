@@ -1,13 +1,13 @@
 package listener
 
 import (
-	"errors"
-	"github.com/streadway/amqp"
-	"magecomm/logger"
-	"magecomm/messages/handler"
-	"magecomm/services"
-	"magecomm/system_limits"
-	"sync"
+    "errors"
+    "github.com/streadway/amqp"
+    "magecomm/logger"
+    "magecomm/messages/handler"
+    "magecomm/services"
+    "magecomm/system_limits"
+    "sync"
 )
 
 type RmqListener struct {

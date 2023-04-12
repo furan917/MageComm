@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/spf13/cobra"
 	"magecomm/magerun"
-	"magecomm/messages"
 	"strings"
 )
 
@@ -12,7 +11,7 @@ const MageRunQueue = "magerun"
 
 func publishMageRunMessage(args []string) {
 	messageBody := strings.Join(args, " ")
-	messages.MapPublisherToEngine(MageRunQueue, messageBody)
+	publisher.Publish(MageRunQueue, messageBody)
 }
 
 var MagerunCmd = &cobra.Command{
