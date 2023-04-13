@@ -4,7 +4,7 @@ import (
 	"github.com/spf13/cobra"
 	"magecomm/config_manager"
 	"magecomm/logger"
-	"magecomm/messages"
+	"magecomm/messages/mappers/listener_mapper"
 	"strings"
 )
 
@@ -22,6 +22,6 @@ var ListenCmd = &cobra.Command{
 			queueNames = strings.Split(queuesFromEnv, ",")
 		}
 
-		messages.MapListenerToEngine(queueNames)
+		listener_mapper.MapListenerToEngine(queueNames)
 	},
 }

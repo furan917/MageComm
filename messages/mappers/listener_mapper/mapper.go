@@ -1,15 +1,13 @@
-package messages
+package listener_mapper
 
 import (
-	"log"
-	"magecomm/config_manager"
-	"magecomm/logger"
-	"magecomm/messages/listener"
-	"magecomm/messages/publisher"
-	"magecomm/services"
-	"os"
-	"os/signal"
-	"syscall"
+    "magecomm/config_manager"
+    "magecomm/logger"
+    "magecomm/messages/listener"
+    "magecomm/services"
+    "os"
+    "os/signal"
+    "syscall"
 )
 
 func MapListenerToEngine(queueNames []string) {
@@ -36,28 +34,6 @@ func MapListenerToEngine(queueNames []string) {
 	go listenerClass.ListenToService(queueNames)
 	<-sigChan
 	listenerClass.Close()
-}
-
-func MapPublisherToEngine(queueName string, messageBody string) {
-	engine := getEngine()
-	logger.Debugf("publishing message:", messageBody, " to queue: ", queueName, "on engine:", engine)
-
-	var publishClass publisher.Publisher
-
-	switch engine {
-	case services.EngineSQS:
-		publishClass = &publisher.SQSPublisher{}
-	case services.EngineRabbitMQ:
-		publishClass = &publisher.RmqPublisher{}
-	default:
-		logger.Fatalf("Invalid engine specified for publisher: '%s'. Supported engines are: '%s','%s'.\n", engine, services.EngineSQS, services.EngineRabbitMQ)
-		return
-	}
-
-	err := publishClass.PublishMessage(messageBody, queueName)
-	if err != nil {
-		log.Fatalf("Failed to publish message: %v", err)
-	}
 }
 
 func getEngine() string {

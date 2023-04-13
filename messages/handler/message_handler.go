@@ -8,12 +8,12 @@ import (
 
 const MessageRetryLimit = 5
 
-func HandleReceivedMessage(queueName string, messageBody string) error {
+func HandleReceivedMessage(messageBody string, queueName string, correlationID string) error {
 	logger.Debugf("Handling message from queue:", queueName)
 
 	switch queueName {
 	case "magerun":
-		magerun.HandleMagerunCommand(messageBody)
+		magerun.HandleMagerunCommand(messageBody, correlationID)
 	case "deploy":
 		logger.Infof("Deploying...")
 	default:

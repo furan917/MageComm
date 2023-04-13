@@ -1,17 +1,19 @@
 package cmd
 
-import "magecomm/messages"
+import (
+	"magecomm/messages/mappers/publisher_mapper"
+)
 
 type MessagePublisher interface {
-	Publish(queue string, messageBody string)
+	Publish(messageBody string, queue string, addCorrelationID string) (string, error)
 }
 
 var publisher MessagePublisher = &defaultMessagePublisher{}
 
 type defaultMessagePublisher struct{}
 
-func (d *defaultMessagePublisher) Publish(queue string, messageBody string) {
-	messages.MapPublisherToEngine(queue, messageBody)
+func (d *defaultMessagePublisher) Publish(messageBody string, queue string, addCorrelationID string) (string, error) {
+	return publisher_mapper.MapPublisherToEngine(messageBody, queue, addCorrelationID)
 }
 
 func SetMessagePublisher(p MessagePublisher) {

@@ -5,6 +5,7 @@ import (
 	"github.com/streadway/amqp"
 	"magecomm/config_manager"
 	"magecomm/logger"
+	"magecomm/messages/mappers/queue_mapper"
 )
 
 const (
@@ -19,13 +20,9 @@ func NewRabbitMQConnection() *RabbitMQConnection {
 	return &RabbitMQConnection{}
 }
 
-func GetRmqQueueNameWithConfigPrefix(queueName string) string {
-	return fmt.Sprintf("%s-%s", config_manager.GetValue(config_manager.CommandConfigEnvironment), queueName)
-}
-
 func CreateRmqQueue(channel *amqp.Channel, queueName string) (string, error) {
 	//The prefixed name is only used for actual communication, for internal use we use the original name
-	queueNameWithConfigPrefix := GetRmqQueueNameWithConfigPrefix(queueName)
+	queueNameWithConfigPrefix := queue_mapper.MapQueueToEngineQueue(queueName)
 	//declare quorum queue
 	_, err := channel.QueueDeclare(
 		queueNameWithConfigPrefix,
@@ -44,26 +41,35 @@ func CreateRmqQueue(channel *amqp.Channel, queueName string) (string, error) {
 	return queueNameWithConfigPrefix, nil
 }
 
-func PublishRmqMessage(channel *amqp.Channel, queueName string, message []byte, messageHeaders amqp.Table) {
+func PublishRmqMessage(channel *amqp.Channel, queueName string, message []byte, messageHeaders amqp.Table, addCorrelationID string) (string, error) {
+	correlationID := ""
+	if addCorrelationID != "" {
+		correlationID = addCorrelationID
+	}
+
 	_, err := CreateRmqQueue(channel, queueName)
 	if err != nil {
 		logger.Fatalf("Failed to create queue: %v", err)
 	}
+
 	err = channel.Publish(
 		"",
-		GetRmqQueueNameWithConfigPrefix(queueName),
+		queue_mapper.MapQueueToEngineQueue(queueName),
 		false,
 		false,
 		amqp.Publishing{
-			ContentType:  "application/json",
-			Body:         message,
-			Headers:      messageHeaders,
-			DeliveryMode: amqp.Persistent,
+			ContentType:   "application/json",
+			Body:          message,
+			Headers:       messageHeaders,
+			DeliveryMode:  amqp.Persistent,
+			CorrelationId: correlationID,
 		},
 	)
 	if err != nil {
-		logger.Warnf("Failed to requeue message: %v", err)
+		return "", fmt.Errorf("failed to publish a message: %v", err)
 	}
+
+	return correlationID, nil
 }
 
 func getRabbitMQURL() string {

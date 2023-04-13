@@ -1,18 +1,19 @@
 package publisher
 
 import (
+	"fmt"
 	"github.com/streadway/amqp"
 	"magecomm/logger"
+	"magecomm/messages/listener"
 	"magecomm/services"
 )
 
 type RmqPublisher struct{}
 
-func (publisher *RmqPublisher) PublishMessage(message string, queueName string) error {
+func (publisher *RmqPublisher) PublishMessage(message string, queueName string, addCorrelationID string) (string, error) {
 	rmqConn, channel, err := services.CreateRmqChannel()
 	if err != nil {
-		logger.Fatalf("Failed to create RabbitMQ channel: %v", err)
-		return err
+		return "", fmt.Errorf("failed to create RabbitMQ channel: %v", err)
 	}
 	defer func() {
 		err := rmqConn.Disconnect()
@@ -27,6 +28,18 @@ func (publisher *RmqPublisher) PublishMessage(message string, queueName string) 
 		}
 	}()
 
-	services.PublishRmqMessage(channel, queueName, []byte(message), amqp.Table{})
-	return nil
+	correlationID, err := services.PublishRmqMessage(channel, queueName, []byte(message), amqp.Table{}, addCorrelationID)
+	return correlationID, nil
+}
+
+func (publisher *RmqPublisher) GetOutputReturn(correlationID string, queueName string) (string, error) {
+	correlationListenerClass := &listener.RmqListener{
+		ChannelPool: services.RmqChannelPool,
+	}
+	output, err := correlationListenerClass.ListenForOutputByCorrelationID(queueName, correlationID)
+	if err != nil {
+		return "", err
+	}
+
+	return output, nil
 }

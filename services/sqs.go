@@ -8,6 +8,8 @@ import (
 	"github.com/aws/aws-sdk-go/service/sts"
 	"log"
 	"magecomm/config_manager"
+	"magecomm/logger"
+	"magecomm/messages/mappers/queue_mapper"
 )
 
 const (
@@ -22,13 +24,9 @@ func NewSQSConnection() *SQSConnection {
 	return &SQSConnection{}
 }
 
-func GetSqsQueueNameWithConfigPrefix(queueName string) string {
-	return fmt.Sprintf("%s-%s", config_manager.GetValue(config_manager.CommandConfigEnvironment), queueName)
-}
-
 func CreateSQSQueueIfNotExists(sqsClient *sqs.SQS, queueName string) (string, error) {
 	//The prefixed name is only used for actual communication, for internal use we use the original name
-	queueName = GetSqsQueueNameWithConfigPrefix(queueName)
+	queueName = queue_mapper.MapQueueToEngineQueue(queueName)
 	getQueueUrlInput := &sqs.GetQueueUrlInput{
 		QueueName: aws.String(queueName),
 	}
@@ -64,18 +62,30 @@ func BuildSQSQueueURL(sqsClient *sqs.SQS, queueName string) (string, error) {
 	return fmt.Sprintf("https://sqs.%s.amazonaws.com/%s/%s", awsRegion, awsAccountID, queueName), nil
 }
 
-func PublishSqsMessage(sqsClient *sqs.SQS, queueName string, messageBody string) {
+func PublishSqsMessage(sqsClient *sqs.SQS, queueName string, messageBody string, addCorrelationID string) (string, error) {
+	correlationID := ""
+	if addCorrelationID != "" {
+		correlationID = addCorrelationID
+	}
+
 	queueURL, err := CreateSQSQueueIfNotExists(sqsClient, queueName)
 	_, err = sqsClient.SendMessage(&sqs.SendMessageInput{
 		QueueUrl:    aws.String(queueURL),
 		MessageBody: aws.String(messageBody),
+		MessageAttributes: map[string]*sqs.MessageAttributeValue{
+			"CorrelationID": {
+				DataType:    aws.String("String"),
+				StringValue: aws.String(correlationID),
+			},
+		},
 	})
 
 	if err != nil {
-		log.Printf("Failed to publish message: %v", err)
-	} else {
-		log.Printf("Message published successfully")
+		return "", fmt.Errorf("failed to publish message: %v", err)
 	}
+	logger.Debugf("Message published successfully with correlation ID: %s", correlationID)
+	return correlationID, nil
+
 }
 
 // Connect to SQS using IAM role

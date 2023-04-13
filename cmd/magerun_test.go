@@ -8,13 +8,16 @@ import (
 )
 
 type testMessagePublisher struct {
-	Queue       string
-	MessageBody string
+	Queue            string
+	MessageBody      string
+	AddCorrelationID string
 }
 
-func (t *testMessagePublisher) Publish(queue string, messageBody string) {
+func (t *testMessagePublisher) Publish(queue string, messageBody string, AddCorrelationID string) (string, error) {
 	t.Queue = queue
 	t.MessageBody = messageBody
+	t.AddCorrelationID = AddCorrelationID
+	return "UniqueCorrelationID", nil
 }
 
 func TestMagerunCmd(t *testing.T) {

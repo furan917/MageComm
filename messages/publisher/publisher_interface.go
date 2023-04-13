@@ -1,5 +1,6 @@
 package publisher
 
 type Publisher interface {
-	PublishMessage(queueName string, Message string) error
+	PublishMessage(Message string, queueName string, addCorrelationID string) (string, error)
+	GetOutputReturn(correlationID string, queueName string) (string, error)
 }

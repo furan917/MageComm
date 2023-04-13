@@ -1,6 +1,7 @@
 package config_manager
 
 import (
+	"fmt"
 	"github.com/spf13/viper"
 	"magecomm/logger"
 	"os"
@@ -61,6 +62,49 @@ func getDefault(key string) string {
 	return ""
 }
 
+var defaultAllowedCommands = []string{
+	"admin:token:create",
+	"admin:user:unlock",
+	"app:config:import",
+	"braintree:migrate",
+	"cache:clean",
+	"cache:disable",
+	"cache:enable",
+	"cache:flush",
+	"catalog:images:resize",
+	"catalog:product:attributes:cleanup",
+	"cms:block:toggle",
+	"cms:wysiwyg:restrict",
+	"cron:install",
+	"cron:remove",
+	"cron:run",
+	"dev:query-log:disable",
+	"dev:query-log:enable",
+	"downloadable:domains:add",
+	"downloadable:domains:remove",
+	"inchoo:catalog:footwear-link-update",
+	"index:trigger:recreate",
+	"indexer:reindex",
+	"indexer:reset",
+	"indexer:set-mode",
+	"klevu:images",
+	"klevu:rating",
+	"klevu:sync:category",
+	"klevu:sync:cmspages",
+	"klevu:syncdata",
+	"klevu:syncstore:storecode",
+	"maintenance:allow-ips",
+	"maintenance:disable",
+	"maintenance:enable",
+	"media:dump",
+	"msp:security:recaptcha:disable",
+	"queue:consumers:start",
+	"sys:cron:run",
+	"sys:maintenance",
+	"yotpo:order",
+	"yotpo:sync",
+}
+
 func Configure() {
 	viper.SetConfigName("config")
 	if runtime.GOOS == "windows" {
@@ -86,6 +130,27 @@ func Configure() {
 	if logLevel := GetValue(CommandConfigLogLevel); logLevel != "" {
 		logger.SetLogLevel(logLevel)
 	}
+}
+
+func IsMageRunCommandAllowed(command string) bool {
+	var allowedCommands []string
+
+	allowedCommandsEnv := GetValue(CommandConfigAllowedMageRunCommands)
+	if allowedCommandsEnv != "" {
+		allowedCommands = strings.Split(allowedCommandsEnv, ",")
+	} else {
+		allowedCommands = defaultAllowedCommands
+	}
+
+	for _, allowedCommand := range allowedCommands {
+		if allowedCommand == command {
+			return true
+		}
+	}
+	// print allowed commands
+	logger.Warnf("Command not allowed, allowed commands are:\n%s \n", strings.Join(allowedCommands, ",\n"))
+	fmt.Printf("%s Command not allowed, allowed commands are:\n%s \n", command, strings.Join(allowedCommands, ",\n"))
+	return false
 }
 
 func GetValue(key string) string {
