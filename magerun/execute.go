@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"magecomm/config_manager"
 	"magecomm/logger"
-	"magecomm/messages/mappers/publisher_mapper"
-	"magecomm/messages/mappers/queue_mapper"
+	"magecomm/messages/publisher"
+	"magecomm/messages/queues"
 	"os/exec"
 	"strings"
 )
@@ -27,11 +27,15 @@ func HandleMagerunCommand(messageBody string, correlationID string) {
 	output, err := executeMagerunCommand(args)
 
 	// Publish the output to the RMQ/SQS queue
-	_, err = publisher_mapper.MapPublisherToEngine(output, queue_mapper.MapQueueToOutputQueue(CommandMageRun), correlationID)
+	publisher, err := publisher.MapPublisherToEngine()
 	if err != nil {
 		logger.Warnf("Error publishing message to RMQ/SQS queue:", err)
 	}
 
+	_, err = publisher.PublishMessage(output, queues.MapQueueToOutputQueue(CommandMageRun), correlationID)
+	if err != nil {
+		logger.Errorf("failed to publish message: %v", err)
+	}
 }
 
 func executeMagerunCommand(args []string) (string, error) {

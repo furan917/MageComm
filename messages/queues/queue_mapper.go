@@ -1,4 +1,4 @@
-package queue_mapper
+package queues
 
 import (
 	"fmt"

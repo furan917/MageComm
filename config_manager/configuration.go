@@ -185,3 +185,7 @@ func getEnvFallback(key string) (string, bool) {
 	}
 	return "", false
 }
+
+func GetEngine() string {
+	return GetValue(CommandConfigListenerEngine)
+}

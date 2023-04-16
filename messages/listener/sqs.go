@@ -8,7 +8,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/sqs"
 	"magecomm/logger"
 	"magecomm/messages/handler"
-	"magecomm/messages/mappers/queue_mapper"
+	"magecomm/messages/queues"
 	"magecomm/services"
 	"magecomm/system_limits"
 	"strconv"
@@ -120,7 +120,7 @@ func (listener *SqsListener) listenToQueue(queueName string) {
 
 	queueURL, err := services.CreateSQSQueueIfNotExists(sqsClient, queueName)
 	if err != nil {
-		queueNameWithConfigPrefix := queue_mapper.MapQueueToEngineQueue(queueName)
+		queueNameWithConfigPrefix := queues.MapQueueToEngineQueue(queueName)
 		logger.Fatalf("Error building SQS queue URL for queue %s: %v\n", queueNameWithConfigPrefix, err)
 		return
 	}
@@ -136,7 +136,7 @@ func (listener *SqsListener) listenToQueue(queueName string) {
 }
 
 func (listener *SqsListener) ListenForOutputByCorrelationID(queueName string, correlationID string) (string, error) {
-	queueName = queue_mapper.MapQueueToEngineOutputQueue(queueName)
+	queueName = queues.MapQueueToEngineOutputQueue(queueName)
 	listener.waitGroup.Add(1)
 	defer listener.waitGroup.Done()
 

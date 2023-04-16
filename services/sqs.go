@@ -9,7 +9,7 @@ import (
 	"log"
 	"magecomm/config_manager"
 	"magecomm/logger"
-	"magecomm/messages/mappers/queue_mapper"
+	"magecomm/messages/queues"
 )
 
 const (
@@ -26,7 +26,7 @@ func NewSQSConnection() *SQSConnection {
 
 func CreateSQSQueueIfNotExists(sqsClient *sqs.SQS, queueName string) (string, error) {
 	//The prefixed name is only used for actual communication, for internal use we use the original name
-	queueName = queue_mapper.MapQueueToEngineQueue(queueName)
+	queueName = queues.MapQueueToEngineQueue(queueName)
 	getQueueUrlInput := &sqs.GetQueueUrlInput{
 		QueueName: aws.String(queueName),
 	}

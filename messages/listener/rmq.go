@@ -6,7 +6,7 @@ import (
 	"github.com/streadway/amqp"
 	"magecomm/logger"
 	"magecomm/messages/handler"
-	"magecomm/messages/mappers/queue_mapper"
+	"magecomm/messages/queues"
 	"magecomm/services"
 	"magecomm/system_limits"
 	"sync"
@@ -106,7 +106,7 @@ func (listener *RmqListener) listenToQueue(queueName string) {
 }
 
 func (listener *RmqListener) ListenForOutputByCorrelationID(queueName string, correlationID string) (string, error) {
-	queueName = queue_mapper.MapQueueToEngineOutputQueue(queueName)
+	queueName = queues.MapQueueToEngineOutputQueue(queueName)
 	channel, err := listener.ChannelPool.Get()
 	if err != nil {
 		logger.Warnf("Error getting channel from pool: %v", err)

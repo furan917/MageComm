@@ -5,7 +5,7 @@ import (
 	"github.com/streadway/amqp"
 	"magecomm/config_manager"
 	"magecomm/logger"
-	"magecomm/messages/mappers/queue_mapper"
+	"magecomm/messages/queues"
 )
 
 const (
@@ -22,7 +22,7 @@ func NewRabbitMQConnection() *RabbitMQConnection {
 
 func CreateRmqQueue(channel *amqp.Channel, queueName string) (string, error) {
 	//The prefixed name is only used for actual communication, for internal use we use the original name
-	queueNameWithConfigPrefix := queue_mapper.MapQueueToEngineQueue(queueName)
+	queueNameWithConfigPrefix := queues.MapQueueToEngineQueue(queueName)
 	//declare quorum queue
 	_, err := channel.QueueDeclare(
 		queueNameWithConfigPrefix,
@@ -54,7 +54,7 @@ func PublishRmqMessage(channel *amqp.Channel, queueName string, message []byte, 
 
 	err = channel.Publish(
 		"",
-		queue_mapper.MapQueueToEngineQueue(queueName),
+		queues.MapQueueToEngineQueue(queueName),
 		false,
 		false,
 		amqp.Publishing{
