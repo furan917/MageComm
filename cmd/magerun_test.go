@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"magecomm/messages/publisher"
 	"strings"
 	"testing"
 
@@ -22,7 +23,7 @@ func (t *testMessagePublisher) Publish(queue string, messageBody string, AddCorr
 
 func TestMagerunCmd(t *testing.T) {
 	testPublisher := &testMessagePublisher{}
-	SetMessagePublisher(testPublisher)
+	publisher.SetMessagePublisher(testPublisher)
 
 	testRootCmd := CreateTestRootCmd()
 	testRootCmd.AddCommand(MagerunCmd)
@@ -34,12 +35,12 @@ func TestMagerunCmd(t *testing.T) {
 	assert.Equal(t, MageRunQueue, testPublisher.Queue)
 	assert.Equal(t, "cache:clean", testPublisher.MessageBody)
 
-	SetMessagePublisher(&defaultMessagePublisher{})
+	publisher.SetMessagePublisher(&publisher.DefaultMessagePublisher{})
 }
 
 func TestMagerunCmdBlocksBannedCmd(t *testing.T) {
 	testPublisher := &testMessagePublisher{}
-	SetMessagePublisher(testPublisher)
+	publisher.SetMessagePublisher(testPublisher)
 
 	testRootCmd := CreateTestRootCmd()
 	testRootCmd.AddCommand(MagerunCmd)
@@ -49,5 +50,5 @@ func TestMagerunCmdBlocksBannedCmd(t *testing.T) {
 
 	assert.True(t, strings.Contains(err.Error(), "the command 'module:enable' is not allowed"))
 
-	SetMessagePublisher(&defaultMessagePublisher{})
+	publisher.SetMessagePublisher(&publisher.DefaultMessagePublisher{})
 }

@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"magecomm/config_manager"
 	"magecomm/logger"
-	"magecomm/messages/publisher"
-	"magecomm/messages/queues"
 	"os/exec"
 	"strings"
 )
@@ -18,24 +16,13 @@ func parseMagerunCommand(messageBody string) (string, []string) {
 	return args[0], args[1:]
 }
 
-func HandleMagerunCommand(messageBody string, correlationID string) {
+func HandleMagerunCommand(messageBody string) (string, error) {
 	command, args := parseMagerunCommand(messageBody)
 	if !config_manager.IsMageRunCommandAllowed(command) {
-		return
+		return "", fmt.Errorf("command %s is not allowed", command)
 	}
 	args = append([]string{command}, args...)
-	output, err := executeMagerunCommand(args)
-
-	// Publish the output to the RMQ/SQS queue
-	publisher, err := publisher.MapPublisherToEngine()
-	if err != nil {
-		logger.Warnf("Error publishing message to RMQ/SQS queue:", err)
-	}
-
-	_, err = publisher.PublishMessage(output, queues.MapQueueToOutputQueue(CommandMageRun), correlationID)
-	if err != nil {
-		logger.Errorf("failed to publish message: %v", err)
-	}
+	return executeMagerunCommand(args)
 }
 
 func executeMagerunCommand(args []string) (string, error) {

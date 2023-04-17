@@ -35,11 +35,15 @@ func (listener *RmqListener) shouldExecutionBeDelayed() error {
 func (listener *RmqListener) processRmqMessage(message amqp.Delivery, channel *amqp.Channel, queueName string) {
 	logger.Debugf("Message received from", queueName)
 	correlationID := message.CorrelationId
+	if message.Headers == nil {
+		message.Headers = make(amqp.Table)
+	}
 
 	retryCount, ok := message.Headers["RetryCount"]
 	if !ok {
 		retryCount = 0
 	}
+	retryCount = retryCount.(int)
 
 	err := listener.shouldExecutionBeDelayed()
 	if err != nil {
@@ -106,7 +110,7 @@ func (listener *RmqListener) listenToQueue(queueName string) {
 }
 
 func (listener *RmqListener) ListenForOutputByCorrelationID(queueName string, correlationID string) (string, error) {
-	queueName = queues.MapQueueToEngineOutputQueue(queueName)
+	queueName = queues.MapQueueToOutputQueue(queueName)
 	channel, err := listener.ChannelPool.Get()
 	if err != nil {
 		logger.Warnf("Error getting channel from pool: %v", err)

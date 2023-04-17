@@ -7,11 +7,11 @@ import (
 	"magecomm/services"
 )
 
-func MapListenerToEngine() (Listener, error) {
+func MapListenerToEngine() (MessageListener, error) {
 	engine := config_manager.GetEngine()
 	logger.Debugf("Mapping message to engine:", engine)
 
-	var listenerClass Listener
+	var listenerClass MessageListener
 
 	switch engine {
 	case services.EngineSQS:

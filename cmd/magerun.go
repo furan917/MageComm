@@ -5,17 +5,34 @@ import (
 	"github.com/google/uuid"
 	"github.com/spf13/cobra"
 	"magecomm/config_manager"
+	"magecomm/loading"
+	"magecomm/logger"
+	"magecomm/messages/listener"
+	"magecomm/messages/publisher"
 	"strings"
+	"sync"
 )
 
 const MageRunQueue = "magerun"
 
 func handleMageRunCmdMessage(args []string) error {
 	messageBody := strings.Join(args, " ")
-	output, err := publisher.Publish(messageBody, MageRunQueue, uuid.New().String())
+	publisherClass := publisher.Publisher
+	correlationID, err := publisherClass.Publish(messageBody, MageRunQueue, uuid.New().String())
 	if err != nil {
 		return fmt.Errorf("failed to publish message: %s", err)
 	}
+
+	if correlationID == "" {
+		fmt.Println("Command executed, but no output could be returned")
+		return nil
+	}
+
+	output, err := handleCorrelationID(correlationID, MageRunQueue)
+	if err != nil {
+		return fmt.Errorf("failed to get output: %s", err)
+	}
+
 	if output != "" {
 		fmt.Println(output)
 	} else {
@@ -45,4 +62,28 @@ var MagerunCmd = &cobra.Command{
 		}
 		return nil
 	},
+}
+
+func handleCorrelationID(correlationID string, queueName string) (string, error) {
+	logger.Debugf("Correlation ID:", correlationID, "returned from publisher. Listening for output.")
+
+	var wg sync.WaitGroup
+	stopLoading := make(chan bool)
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		loading.Indicator(stopLoading)
+	}()
+
+	listenerClass := listener.Listener
+	output, err := listenerClass.ListenForOutputByCorrelationID(queueName, correlationID)
+	if err != nil {
+		return "", err
+	}
+
+	// Stop the loading indicator
+	stopLoading <- true
+	wg.Wait()
+
+	return output, err
 }

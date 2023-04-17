@@ -136,7 +136,7 @@ func (listener *SqsListener) listenToQueue(queueName string) {
 }
 
 func (listener *SqsListener) ListenForOutputByCorrelationID(queueName string, correlationID string) (string, error) {
-	queueName = queues.MapQueueToEngineOutputQueue(queueName)
+	queueName = queues.MapQueueToOutputQueue(queueName)
 	listener.waitGroup.Add(1)
 	defer listener.waitGroup.Done()
 
