@@ -41,14 +41,13 @@ func (listener *RmqListener) processRmqMessage(message amqp.Delivery, channel *a
 
 	retryCount, ok := message.Headers["RetryCount"]
 	if !ok {
-		retryCount = 0
+		retryCount = int32(0)
 	}
-	retryCount = retryCount.(int)
 
 	err := listener.shouldExecutionBeDelayed()
 	if err != nil {
 		logger.Warnf("Message deferral time exceeded. Dropping hold on the message.")
-		message.Headers["RetryCount"] = retryCount.(int) + 1
+		message.Headers["RetryCount"] = retryCount.(int32) + 1
 		_, err := services.PublishRmqMessage(channel, queueName, message.Body, message.Headers, correlationID)
 		if err != nil {
 			logger.Warnf("Failed to republish publish message: %v", err)
@@ -57,8 +56,8 @@ func (listener *RmqListener) processRmqMessage(message amqp.Delivery, channel *a
 	}
 	if err := handler.HandleReceivedMessage(string(message.Body), queueName, correlationID); err != nil {
 		logger.Warnf("Failed to process message: %v", err)
-		if retryCount.(int) < handler.MessageRetryLimit {
-			message.Headers["RetryCount"] = retryCount.(int) + 1
+		if retryCount.(int32) < handler.MessageRetryLimit {
+			message.Headers["RetryCount"] = retryCount.(int32) + 1
 			_, err := services.PublishRmqMessage(channel, queueName, message.Body, message.Headers, correlationID)
 			if err != nil {
 				logger.Warnf("Failed to republish publish message: %v", err)

@@ -15,5 +15,5 @@ func MapQueueToEngineOutputQueue(queueName string) string {
 }
 
 func MapQueueToEngineQueue(queueName string) string {
-	return fmt.Sprintf("%s-%s", config_manager.GetValue(config_manager.CommandConfigEnvironment), queueName)
+	return fmt.Sprintf("%s_%s", config_manager.GetValue(config_manager.CommandConfigEnvironment), queueName)
 }

@@ -15,6 +15,28 @@ import (
 
 const MageRunQueue = "magerun"
 
+var MagerunCmd = &cobra.Command{
+	Use:                "magerun",
+	Short:              "A wrapper for the magerun command with restricted command usage",
+	DisableFlagParsing: true,
+	RunE: func(cmd *cobra.Command, args []string) error {
+		if len(args) < 1 {
+			return fmt.Errorf("no command provided")
+		}
+
+		command := args[0]
+		if !config_manager.IsMageRunCommandAllowed(command) {
+			return fmt.Errorf("the command '%s' is not allowed", command)
+		}
+
+		err := handleMageRunCmdMessage(args)
+		if err != nil {
+			return err
+		}
+		return nil
+	},
+}
+
 func handleMageRunCmdMessage(args []string) error {
 	messageBody := strings.Join(args, " ")
 	publisherClass := publisher.Publisher
@@ -40,28 +62,6 @@ func handleMageRunCmdMessage(args []string) error {
 	}
 
 	return nil
-}
-
-var MagerunCmd = &cobra.Command{
-	Use:                "magerun",
-	Short:              "A wrapper for the magerun command with restricted command usage",
-	DisableFlagParsing: true,
-	RunE: func(cmd *cobra.Command, args []string) error {
-		if len(args) < 1 {
-			return fmt.Errorf("no command provided")
-		}
-
-		command := args[0]
-		if !config_manager.IsMageRunCommandAllowed(command) {
-			return fmt.Errorf("the command '%s' is not allowed", command)
-		}
-
-		err := handleMageRunCmdMessage(args)
-		if err != nil {
-			return err
-		}
-		return nil
-	},
 }
 
 func handleCorrelationID(correlationID string, queueName string) (string, error) {
