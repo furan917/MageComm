@@ -1,4 +1,4 @@
-package messageprocessor
+package handler
 
 import (
 	"magecomm/logger"
@@ -7,11 +7,11 @@ import (
 	"magecomm/messages/queues"
 )
 
-type MagerunProcessor struct {
+type MagerunHandler struct {
 	Publisher publisher.MessagePublisher
 }
 
-func (process *MagerunProcessor) ProcessMessage(messageBody string, correlationID string) error {
+func (handler *MagerunHandler) ProcessMessage(messageBody string, correlationID string) error {
 
 	output, err := magerun.HandleMagerunCommand(messageBody)
 	if err != nil {

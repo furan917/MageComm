@@ -91,6 +91,7 @@ e.g
 
 - A proxy for the magerun command via rmq/sqs with restricted command usage, allowed commands via `MAGECOMM_ALLOWED_MAGERUN_COMMANDS`
 - Engine (sqs|rmq), default sqs, configured in config or by ENV `MAGECOMM_LISTENER_ENGINE`  
+- The command will publish a message and then listen for the outputs return
 
 #### `magecomm listen [queue1] [queue2] ...`
 
@@ -123,6 +124,7 @@ lowercase for file based config, uppercase for ENV
 - `MAGECOMM_ENVIRONMENT`: the environment scope the tool is to work in, Default `default`
 - `MAGECOMM_LISTENERS`: Comma-separated list of queues to listen to
 - `MAGECOMM_LISTENER_ENGINE`: Listener engine to use (sqs/rmq), default: sqs
+- `MAGECOMM_PUBLISHER_OUTPUT_TIMEOUT`: Timeout for when listening to publisher message output return, default: 60s
 - `MAGECOMM_ALLOWED_MAGERUN_COMMANDS ` comma separated list of commands allowed to be run, fallback to in-code list
 - `SQS_AWS_REGION`: AWS region to use for SQS, default: eu-west-1
 - `DEPLOY_ARCHIVE_PATH` path to the folder that contains the archives which are deployed, default: `/srv/magecomm/deploy/`

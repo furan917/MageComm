@@ -1,5 +1,5 @@
-package messageprocessor
+package handler
 
-type MessageProcessor interface {
+type MessageHandler interface {
 	ProcessMessage(message string, CorrelationId string) error
 }

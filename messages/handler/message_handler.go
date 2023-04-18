@@ -3,20 +3,18 @@ package handler
 import (
 	"fmt"
 	"magecomm/logger"
-	"magecomm/messageprocessor"
 	"magecomm/messages/publisher"
 )
 
-// todo:: Maybe move this into messageprocessor or move the messageprocessor into this package
 const MessageRetryLimit = 5
 
 func HandleReceivedMessage(messageBody string, queueName string, correlationID string) error {
 	logger.Debugf("Handling message from queue:", queueName)
-	var processor messageprocessor.MessageProcessor
+	var processor MessageHandler
 
 	switch queueName {
 	case "magerun":
-		processor = &messageprocessor.MagerunProcessor{
+		processor = &MagerunHandler{
 			Publisher: publisher.Publisher,
 		}
 	case "deploy":
