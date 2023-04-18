@@ -17,6 +17,9 @@ jobs:
         with:
           go-version: 1.20
 
+      - name: Set GOPATH
+        run: echo "GOPATH=$(go env GOPATH)" >> $GITHUB_ENV
+
       - name: Build assets
         run: |
           GOOS=linux GOARCH=amd64 go build -o magecomm-linux-amd64
