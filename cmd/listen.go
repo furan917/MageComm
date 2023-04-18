@@ -4,8 +4,11 @@ import (
 	"github.com/spf13/cobra"
 	"magecomm/config_manager"
 	"magecomm/logger"
-	"magecomm/messages"
+	"magecomm/messages/listener"
+	"os"
+	"os/signal"
 	"strings"
+	"syscall"
 )
 
 var ListenCmd = &cobra.Command{
@@ -22,6 +25,17 @@ var ListenCmd = &cobra.Command{
 			queueNames = strings.Split(queuesFromEnv, ",")
 		}
 
-		messages.MapListenerToEngine(queueNames)
+		listener, err := listener.MapListenerToEngine()
+		if err != nil {
+			logger.Fatal(err)
+			return
+		}
+
+		// Create a channel to handle program termination or interruption signals so we can kill any connections if needed
+		sigChan := make(chan os.Signal, 1)
+		signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
+		go listener.ListenToService(queueNames)
+		<-sigChan
+		listener.Close()
 	},
 }

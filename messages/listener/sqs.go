@@ -3,10 +3,12 @@ package listener
 import (
 	"context"
 	"errors"
+	"fmt"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/sqs"
 	"magecomm/logger"
 	"magecomm/messages/handler"
+	"magecomm/messages/queues"
 	"magecomm/services"
 	"magecomm/system_limits"
 	"strconv"
@@ -34,6 +36,7 @@ func (listener *SqsListener) shouldExecutionBeDelayed() error {
 }
 
 func (listener *SqsListener) processSqsMessage(message *sqs.Message, sqsClient *sqs.SQS, queueName string, queueURL string) {
+	correlationID := *message.MessageAttributes["CorrelationID"].StringValue
 	receiveCount, err := strconv.Atoi(*message.Attributes["ApproximateReceiveCount"])
 	if err != nil {
 		logger.Warnf("Error parsing ApproximateReceiveCount attribute: %v", err)
@@ -47,7 +50,7 @@ func (listener *SqsListener) processSqsMessage(message *sqs.Message, sqsClient *
 		logger.Warnf("Message deferral time exceeded. Dropping hold on the message..")
 		return
 	}
-	if err := handler.HandleReceivedMessage(queueName, messageBody); err != nil {
+	if err := handler.HandleReceivedMessage(messageBody, queueName, correlationID); err != nil {
 		logger.Warnf("Error handling message, could not process command:", messageBody,
 			" retry attempt:", receiveCount, "of 5",
 			" error:", err)
@@ -107,7 +110,6 @@ func (listener *SqsListener) listenToQueue(queueName string) {
 	if err != nil {
 		logger.Fatalf("Unable to get SQS connection from pool %v", err)
 	}
-
 	defer services.ReleaseSQSConnection(sqsConnection)
 
 	err = sqsConnection.Connect()
@@ -118,7 +120,7 @@ func (listener *SqsListener) listenToQueue(queueName string) {
 
 	queueURL, err := services.CreateSQSQueueIfNotExists(sqsClient, queueName)
 	if err != nil {
-		queueNameWithConfigPrefix := services.GetSqsQueueNameWithConfigPrefix(queueName)
+		queueNameWithConfigPrefix := queues.MapQueueToEngineQueue(queueName)
 		logger.Fatalf("Error building SQS queue URL for queue %s: %v\n", queueNameWithConfigPrefix, err)
 		return
 	}
@@ -129,6 +131,58 @@ func (listener *SqsListener) listenToQueue(queueName string) {
 			return
 		default:
 			listener.loopThroughMessages(sqsClient, queueName, queueURL)
+		}
+	}
+}
+
+func (listener *SqsListener) ListenForOutputByCorrelationID(queueName string, correlationID string) (string, error) {
+	queueName = queues.MapQueueToOutputQueue(queueName)
+	listener.waitGroup.Add(1)
+	defer listener.waitGroup.Done()
+
+	sqsConnection, err := services.GetSQSConnection()
+	if err != nil {
+		logger.Fatalf("Unable to get SQS connection from pool %v", err)
+	}
+	defer services.ReleaseSQSConnection(sqsConnection)
+
+	err = sqsConnection.Connect()
+	if err != nil {
+		logger.Fatalf("Error connecting to SQS: %v", err)
+	}
+	sqsClient := sqsConnection.Client
+	queueURL, err := services.CreateSQSQueueIfNotExists(sqsClient, queueName)
+
+	input := &sqs.ReceiveMessageInput{
+		QueueUrl: aws.String(queueURL),
+		AttributeNames: []*string{
+			aws.String("All"),
+		},
+		MessageAttributeNames: []*string{
+			aws.String("CorrelationId"),
+		},
+		WaitTimeSeconds: aws.Int64(20),
+	}
+
+	for {
+		resp, err := sqsClient.ReceiveMessage(input)
+		if err != nil {
+			return "", fmt.Errorf("failed to receive message: %s", err)
+		}
+
+		for _, msg := range resp.Messages {
+			if msg.MessageAttributes["CorrelationId"].StringValue != nil && *msg.MessageAttributes["CorrelationId"].StringValue == correlationID {
+				output := *msg.Body
+				_, err := sqsClient.DeleteMessage(&sqs.DeleteMessageInput{
+					QueueUrl:      aws.String(queueURL),
+					ReceiptHandle: msg.ReceiptHandle,
+				})
+				if err != nil {
+					return "", fmt.Errorf("failed to delete message: %s", err)
+				}
+
+				return output, nil
+			}
 		}
 	}
 }

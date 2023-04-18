@@ -3,21 +3,34 @@ package handler
 import (
 	"fmt"
 	"magecomm/logger"
-	"magecomm/magerun"
+	"magecomm/messages/publisher"
 )
 
 const MessageRetryLimit = 5
 
-func HandleReceivedMessage(queueName string, messageBody string) error {
+func HandleReceivedMessage(messageBody string, queueName string, correlationID string) error {
 	logger.Debugf("Handling message from queue:", queueName)
+	var processor MessageHandler
 
 	switch queueName {
 	case "magerun":
-		magerun.HandleMagerunCommand(messageBody)
+		processor = &MagerunHandler{
+			Publisher: publisher.Publisher,
+		}
 	case "deploy":
 		logger.Infof("Deploying...")
+		// assign the appropriate processor here
 	default:
 		return fmt.Errorf("no known message handler for queue: %s", queueName)
 	}
+
+	if processor == nil {
+		return fmt.Errorf("no message processor found for queue: %s", queueName)
+	}
+	err := processor.ProcessMessage(messageBody, correlationID)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }

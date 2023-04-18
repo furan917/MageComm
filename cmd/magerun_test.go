@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"magecomm/messages/publisher"
 	"strings"
 	"testing"
 
@@ -8,18 +9,21 @@ import (
 )
 
 type testMessagePublisher struct {
-	Queue       string
-	MessageBody string
+	Queue            string
+	MessageBody      string
+	AddCorrelationID string
 }
 
-func (t *testMessagePublisher) Publish(queue string, messageBody string) {
+func (t *testMessagePublisher) Publish(queue string, messageBody string, AddCorrelationID string) (string, error) {
 	t.Queue = queue
 	t.MessageBody = messageBody
+	t.AddCorrelationID = AddCorrelationID
+	return "UniqueCorrelationID", nil
 }
 
 func TestMagerunCmd(t *testing.T) {
 	testPublisher := &testMessagePublisher{}
-	SetMessagePublisher(testPublisher)
+	publisher.SetMessagePublisher(testPublisher)
 
 	testRootCmd := CreateTestRootCmd()
 	testRootCmd.AddCommand(MagerunCmd)
@@ -31,12 +35,12 @@ func TestMagerunCmd(t *testing.T) {
 	assert.Equal(t, MageRunQueue, testPublisher.Queue)
 	assert.Equal(t, "cache:clean", testPublisher.MessageBody)
 
-	SetMessagePublisher(&defaultMessagePublisher{})
+	publisher.SetMessagePublisher(&publisher.DefaultMessagePublisher{})
 }
 
 func TestMagerunCmdBlocksBannedCmd(t *testing.T) {
 	testPublisher := &testMessagePublisher{}
-	SetMessagePublisher(testPublisher)
+	publisher.SetMessagePublisher(testPublisher)
 
 	testRootCmd := CreateTestRootCmd()
 	testRootCmd.AddCommand(MagerunCmd)
@@ -46,5 +50,5 @@ func TestMagerunCmdBlocksBannedCmd(t *testing.T) {
 
 	assert.True(t, strings.Contains(err.Error(), "the command 'module:enable' is not allowed"))
 
-	SetMessagePublisher(&defaultMessagePublisher{})
+	publisher.SetMessagePublisher(&publisher.DefaultMessagePublisher{})
 }

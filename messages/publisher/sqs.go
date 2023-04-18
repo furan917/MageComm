@@ -1,21 +1,23 @@
 package publisher
 
 import (
-	"magecomm/logger"
+	"fmt"
 	"magecomm/services"
 )
 
 type SQSPublisher struct{}
 
-func (publisher *SQSPublisher) PublishMessage(queueName string, message string) error {
+func (publisher *SQSPublisher) Publish(message string, queueName string, addCorrelationID string) (string, error) {
 	sqsConnection := services.NewSQSConnection()
 	err := sqsConnection.Connect()
 	if err != nil {
-		logger.Fatalf("Error connecting to SQS: %v", err)
-		return err
+		return "", fmt.Errorf("error connecting to SQS: %v", err)
 	}
 	sqsClient := sqsConnection.Client
 
-	services.PublishSqsMessage(sqsClient, queueName, message)
-	return nil
+	correlationID, err := services.PublishSqsMessage(sqsClient, queueName, message, addCorrelationID)
+	if err != nil {
+		return "", fmt.Errorf("error publishing message to SQS: %v", err)
+	}
+	return correlationID, nil
 }

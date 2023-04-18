@@ -1,13 +1,15 @@
 package listener
 
 import (
-    "errors"
-    "github.com/streadway/amqp"
-    "magecomm/logger"
-    "magecomm/messages/handler"
-    "magecomm/services"
-    "magecomm/system_limits"
-    "sync"
+	"errors"
+	"fmt"
+	"github.com/streadway/amqp"
+	"magecomm/logger"
+	"magecomm/messages/handler"
+	"magecomm/messages/queues"
+	"magecomm/services"
+	"magecomm/system_limits"
+	"sync"
 )
 
 type RmqListener struct {
@@ -32,23 +34,34 @@ func (listener *RmqListener) shouldExecutionBeDelayed() error {
 
 func (listener *RmqListener) processRmqMessage(message amqp.Delivery, channel *amqp.Channel, queueName string) {
 	logger.Debugf("Message received from", queueName)
+	correlationID := message.CorrelationId
+	if message.Headers == nil {
+		message.Headers = make(amqp.Table)
+	}
+
 	retryCount, ok := message.Headers["RetryCount"]
 	if !ok {
-		retryCount = 0
+		retryCount = int32(0)
 	}
 
 	err := listener.shouldExecutionBeDelayed()
 	if err != nil {
 		logger.Warnf("Message deferral time exceeded. Dropping hold on the message.")
-		message.Headers["RetryCount"] = retryCount.(int) + 1
-		services.PublishRmqMessage(channel, queueName, message.Body, message.Headers)
+		message.Headers["RetryCount"] = retryCount.(int32) + 1
+		_, err := services.PublishRmqMessage(channel, queueName, message.Body, message.Headers, correlationID)
+		if err != nil {
+			logger.Warnf("Failed to republish publish message: %v", err)
+		}
 		return
 	}
-	if err := handler.HandleReceivedMessage(queueName, string(message.Body)); err != nil {
+	if err := handler.HandleReceivedMessage(string(message.Body), queueName, correlationID); err != nil {
 		logger.Warnf("Failed to process message: %v", err)
-		if retryCount.(int) < handler.MessageRetryLimit {
-			message.Headers["RetryCount"] = retryCount.(int) + 1
-			services.PublishRmqMessage(channel, queueName, message.Body, message.Headers)
+		if retryCount.(int32) < handler.MessageRetryLimit {
+			message.Headers["RetryCount"] = retryCount.(int32) + 1
+			_, err := services.PublishRmqMessage(channel, queueName, message.Body, message.Headers, correlationID)
+			if err != nil {
+				logger.Warnf("Failed to republish publish message: %v", err)
+			}
 		} else {
 			logger.Warnf("Retry count exceeded. Discarding the message.")
 		}
@@ -93,6 +106,47 @@ func (listener *RmqListener) listenToQueue(queueName string) {
 			return
 		}
 	}
+}
+
+func (listener *RmqListener) ListenForOutputByCorrelationID(queueName string, correlationID string) (string, error) {
+	queueName = queues.MapQueueToOutputQueue(queueName)
+	channel, err := listener.ChannelPool.Get()
+	if err != nil {
+		logger.Warnf("Error getting channel from pool: %v", err)
+		return "", err
+	}
+	defer listener.ChannelPool.Put(channel)
+
+	queueNameWithConfigPrefix, err := services.CreateRmqQueue(channel, queueName)
+	if err != nil {
+		return "", err
+	}
+	msgs, err := channel.Consume(
+		queueNameWithConfigPrefix,
+		"",
+		false,
+		false,
+		false,
+		false,
+		nil,
+	)
+	if err != nil {
+		return "", fmt.Errorf("failed to consume messages: %s", err)
+	}
+
+	for msg := range msgs {
+		if correlationID == msg.CorrelationId {
+			output := string(msg.Body)
+			err = msg.Ack(false)
+			if err != nil {
+				return "", fmt.Errorf("failed to acknowledge message: %s", err)
+			}
+
+			return output, nil
+		}
+	}
+
+	return "", fmt.Errorf("failed to receive message with correlation ID: %s", correlationID)
 }
 
 func (listener *RmqListener) ListenToService(queueNames []string) {
