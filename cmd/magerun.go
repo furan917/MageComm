@@ -47,7 +47,7 @@ func handleMageRunCmdMessage(args []string) error {
 		return nil
 	}
 
-	output, err := listener.HandleCorrelationID(correlationID, MageRunQueue)
+	output, err := listener.HandleOutputByCorrelationID(correlationID, MageRunQueue)
 	if err != nil {
 		return fmt.Errorf("failed to get output: %s", err)
 	}
