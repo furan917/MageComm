@@ -20,6 +20,9 @@ jobs:
       - name: Set GOPATH
         run: echo "GOPATH=$(go env GOPATH)" >> $GITHUB_ENV
 
+      - name: Download dependencies
+        run: go mod download
+
       - name: Build assets
         run: |
           GOOS=linux GOARCH=amd64 go build -o magecomm-linux-amd64

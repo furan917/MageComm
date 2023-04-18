@@ -22,6 +22,9 @@ jobs:
       - name: Set GOPATH
         run: echo "GOPATH=$(go env GOPATH)" >> $GITHUB_ENV
 
+      - name: Download dependencies
+        run: go mod download
+
       - name: Check out code
         uses: actions/checkout@v2
 
