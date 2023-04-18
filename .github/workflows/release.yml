@@ -1,0 +1,97 @@
+ame: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.20
+
+      - name: Build assets
+        run: |
+          GOOS=linux GOARCH=amd64 go build -o magecomm-linux-amd64
+          GOOS=linux GOARCH=arm64 go build -o magecomm-linux-arm64
+          GOOS=windows GOARCH=amd64 go build -o magecomm-windows-amd64.exe
+          GOOS=darwin GOARCH=amd64 go build -o magecomm-darwin-amd64
+          GOOS=darwin GOARCH=arm64 go build -o magecomm-darwin-arm64
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
+
+      - name: Upload amd64 linux assets
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./magecomm-linux-amd64
+          asset_name: magecomm-linux-amd64
+          asset_content_type: application/octet-stream
+
+      - name: Upload arm64 linux assets
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./magecomm-linux-arm64
+          asset_name: magecomm-linux-arm64
+          asset_content_type: application/octet-stream
+
+      - name: Upload amd64 windows assets
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+            upload_url: ${{ steps.create_release.outputs.upload_url }}
+            asset_path: ./magecomm-windows-amd64.exe
+            asset_name: magecomm-windows-amd64.exe
+            asset_content_type: application/octet-stream
+
+      - name: Upload amd64 darwin assets
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+            upload_url: ${{ steps.create_release.outputs.upload_url }}
+            asset_path: ./magecomm-darwin-amd64
+            asset_name: magecomm-darwin-amd64
+            asset_content_type: application/octet-stream
+
+      - name: Upload arm64 darwin assets
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+            upload_url: ${{ steps.create_release.outputs.upload_url }}
+            asset_path: ./magecomm-darwin-arm64
+            asset_name: magecomm-darwin-arm64
+            asset_content_type: application/octet-stream
+
+      - name: Upload source code
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+            upload_url: ${{ steps.create_release.outputs.upload_url }}
+            asset_path: ./magecomm.go
+            asset_name: magecomm.go
+            asset_content_type: application/octet-stream
