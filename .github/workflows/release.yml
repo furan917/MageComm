@@ -91,13 +91,3 @@ jobs:
             asset_path: ./magecomm-darwin-arm64
             asset_name: magecomm-darwin-arm64
             asset_content_type: application/octet-stream
-
-      - name: Upload source code
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-            upload_url: ${{ steps.create_release.outputs.upload_url }}
-            asset_path: ./magecomm.go
-            asset_name: magecomm.go
-            asset_content_type: application/octet-stream
