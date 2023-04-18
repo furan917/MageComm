@@ -17,6 +17,7 @@ const (
 	CommandConfigEnvironment               = "magecomm_environment"
 	CommandConfigListenerEngine            = "magecomm_listener_engine"
 	CommandConfigListeners                 = "magecomm_listeners"
+	CommandConfigPublisherOutputTimeout    = "magecomm_publisher_output_timeout"
 	CommandConfigAllowedMageRunCommands    = "magecomm_allowed_magerun_commands"
 	CommandConfigDeployArchiveFolder       = "magecomm_deploy_archive_path"
 	CommandConfigDeployArchiveLatestFile   = "magecomm_deploy_archive_latest_file"
@@ -43,6 +44,7 @@ func getDefault(key string) string {
 		CommandConfigEnvironment:               "default",
 		CommandConfigListenerEngine:            "sqs",
 		CommandConfigListeners:                 "",
+		CommandConfigPublisherOutputTimeout:    "60",
 		CommandConfigAllowedMageRunCommands:    "",
 		CommandConfigDeployArchiveFolder:       "/srv/magecomm/deploy/",
 		CommandConfigDeployArchiveLatestFile:   "latest.tar.gz",

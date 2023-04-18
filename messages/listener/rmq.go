@@ -135,7 +135,7 @@ func (listener *RmqListener) ListenForOutputByCorrelationID(queueName string, co
 	}
 
 	for msg := range msgs {
-		if corrID, ok := msg.Headers["CorrelationId"].(string); ok && corrID == correlationID {
+		if correlationID == msg.CorrelationId {
 			output := string(msg.Body)
 			err = msg.Ack(false)
 			if err != nil {
