@@ -11,6 +11,8 @@ import (
 
 const CommandMageRun = "magerun"
 
+const MageRunQueue = "magerun"
+
 func parseMagerunCommand(messageBody string) (string, []string) {
 	args := strings.Fields(messageBody)
 	return args[0], args[1:]
@@ -22,10 +24,10 @@ func HandleMagerunCommand(messageBody string) (string, error) {
 		return "", fmt.Errorf("command %s is not allowed", command)
 	}
 	args = append([]string{command}, args...)
-	return executeMagerunCommand(args)
+	return ExecuteMagerunCommand(args)
 }
 
-func executeMagerunCommand(args []string) (string, error) {
+func ExecuteMagerunCommand(args []string) (string, error) {
 	logger.Infof("Executing command %s with args: %v\n", CommandMageRun, args)
 	cmd := exec.Command(CommandMageRun, args...)
 

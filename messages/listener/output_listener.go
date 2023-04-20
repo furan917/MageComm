@@ -3,7 +3,7 @@ package listener
 import (
 	"fmt"
 	"magecomm/config_manager"
-	"magecomm/loading"
+	"magecomm/config_manager/loading"
 	"magecomm/logger"
 	"strconv"
 	"sync"

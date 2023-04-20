@@ -4,11 +4,11 @@ import (
 	"errors"
 	"fmt"
 	"github.com/streadway/amqp"
+	"magecomm/config_manager/system_limits"
 	"magecomm/logger"
 	"magecomm/messages/handler"
 	"magecomm/messages/queues"
 	"magecomm/services"
-	"magecomm/system_limits"
 	"sync"
 )
 
