@@ -44,13 +44,13 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          TAG_NAME=${{ github.event.inputs.tag_name || github.ref }}
+          TAG_NAME=${{ github.event.inputs.tag_name || github.ref_name }}
           RELEASE_NAME="Release $TAG_NAME"
           RELEASE_API_URL="https://api.github.com/repos/${{ github.repository }}/releases"
-          
+
           RELEASE_ID=$(curl --silent --location --header "Authorization: Bearer $GITHUB_TOKEN" \
             $RELEASE_API_URL | jq ".[] | select(.tag_name == \"$TAG_NAME\") | .id")
-          
+
           if [ -z "$RELEASE_ID" ]; then
             echo "Creating new release..."
             RELEASE_RESPONSE=$(curl --silent --location --request POST \
@@ -66,9 +66,14 @@ jobs:
               --data "{\"name\": \"$RELEASE_NAME\", \"draft\": false, \"prerelease\": false}" \
               $RELEASE_API_URL/$RELEASE_ID)
           fi
-          
-          UPLOAD_URL=$(echo $RELEASE_RESPONSE | jq -r .upload_url)
-          echo "UPLOAD_URL=$UPLOAD_URL" >> $GITHUB_ENV
+
+          if [ "$(echo $RELEASE_RESPONSE | jq -r .upload_url)" != "null" ]; then
+            UPLOAD_URL=$(echo $RELEASE_RESPONSE | jq -r .upload_url)
+            echo "UPLOAD_URL=$UPLOAD_URL" >> $GITHUB_ENV
+          else
+            echo "Error: Upload URL is null."
+            exit 1
+          fi
 
       - name: Upload amd64 linux assets
         uses: actions/upload-release-asset@v1
