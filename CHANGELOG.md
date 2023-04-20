@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.11](https://github.com/furan917/MageComm/compare/v0.0.10...v0.0.11) (2023-04-20)
+
+
+### Bug Fixes
+
+* Correct release.yml behaviour and allow manual running of QOL actions ([644dfaa](https://github.com/furan917/MageComm/commit/644dfaa666385c967709cd61c8ba75ae5d2bfe13))
+
 ## [0.0.10](https://github.com/furan917/MageComm/compare/v0.0.9...v0.0.10) (2023-04-20)
 
 
