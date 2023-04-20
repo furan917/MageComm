@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       tag_name:
-        description: 'Tag name for the release'
+        description: 'Tag name for the release e.g v1.0.0'
         required: true
 
 jobs:
@@ -75,7 +75,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          upload_url: ${{ env.UPLOAD_URL }}
           asset_path: ./magecomm-linux-amd64
           asset_name: magecomm-linux-amd64
           asset_content_type: application/octet-stream
@@ -85,7 +85,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          upload_url: ${{ env.UPLOAD_URL }}
           asset_path: ./magecomm-linux-arm64
           asset_name: magecomm-linux-arm64
           asset_content_type: application/octet-stream
@@ -95,7 +95,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-            upload_url: ${{ steps.create_release.outputs.upload_url }}
+            upload_url: ${{ env.UPLOAD_URL }}
             asset_path: ./magecomm-windows-amd64.exe
             asset_name: magecomm-windows-amd64.exe
             asset_content_type: application/octet-stream
@@ -105,7 +105,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-            upload_url: ${{ steps.create_release.outputs.upload_url }}
+            upload_url: ${{ env.UPLOAD_URL }}
             asset_path: ./magecomm-darwin-amd64
             asset_name: magecomm-darwin-amd64
             asset_content_type: application/octet-stream
@@ -115,7 +115,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-            upload_url: ${{ steps.create_release.outputs.upload_url }}
+            upload_url: ${{ env.UPLOAD_URL }}
             asset_path: ./magecomm-darwin-arm64
             asset_name: magecomm-darwin-arm64
             asset_content_type: application/octet-stream
