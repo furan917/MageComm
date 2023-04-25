@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.14](https://github.com/furan917/MageComm/compare/v0.0.13...v0.0.14) (2023-04-25)
+
+
+### Bug Fixes
+
+* Correct tests to work with new functionality ([5b82107](https://github.com/furan917/MageComm/commit/5b82107be816ccf9534d20b11b90cbf8f2b012ad))
+
 ## [0.0.13](https://github.com/furan917/MageComm/compare/v0.0.12...v0.0.13) (2023-04-25)
 
 
