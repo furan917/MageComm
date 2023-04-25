@@ -1,6 +1,7 @@
 package config_manager
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/spf13/viper"
 	"magecomm/logger"
@@ -10,17 +11,20 @@ import (
 )
 
 const (
-	CommandConfigLogPath                   = "magecomm_log_path"
-	CommandConfigLogLevel                  = "magecomm_log_level"
-	CommandConfigMaxOperationalCpuLimit    = "magecomm_max_operational_cpu_limit"
-	CommandConfigMaxOperationalMemoryLimit = "magecomm_max_operational_memory_limit"
-	CommandConfigEnvironment               = "magecomm_environment"
-	CommandConfigListenerEngine            = "magecomm_listener_engine"
-	CommandConfigListeners                 = "magecomm_listeners"
-	CommandConfigPublisherOutputTimeout    = "magecomm_publisher_output_timeout"
-	CommandConfigAllowedMageRunCommands    = "magecomm_allowed_magerun_commands"
-	CommandConfigDeployArchiveFolder       = "magecomm_deploy_archive_path"
-	CommandConfigDeployArchiveLatestFile   = "magecomm_deploy_archive_latest_file"
+	CommandConfigLogPath                      = "magecomm_log_path"
+	CommandConfigLogLevel                     = "magecomm_log_level"
+	CommandConfigMaxOperationalCpuLimit       = "magecomm_max_operational_cpu_limit"
+	CommandConfigMaxOperationalMemoryLimit    = "magecomm_max_operational_memory_limit"
+	CommandConfigEnvironment                  = "magecomm_environment"
+	CommandConfigListenerEngine               = "magecomm_listener_engine"
+	CommandConfigListeners                    = "magecomm_listeners"
+	CommandConfigPublisherOutputTimeout       = "magecomm_publisher_output_timeout"
+	CommandConfigMageRunCommandPath           = "magecomm_magerun_command_path"
+	CommandConfigAllowedMageRunCommands       = "magecomm_allowed_magerun_commands"
+	CommandConfigRestrictedMagerunCommandArgs = "magecomm_restricted_magerun_command_args"
+	CommandConfigRequiredMagerunCommandArgs   = "magecomm_required_magerun_command_args"
+	CommandConfigDeployArchiveFolder          = "magecomm_deploy_archive_path"
+	CommandConfigDeployArchiveLatestFile      = "magecomm_deploy_archive_latest_file"
 
 	//SQS
 	ConfigSQSRegion = "magecomm_sqs_aws_region"
@@ -45,6 +49,7 @@ func getDefault(key string) string {
 		CommandConfigListenerEngine:            "sqs",
 		CommandConfigListeners:                 "",
 		CommandConfigPublisherOutputTimeout:    "60",
+		CommandConfigMageRunCommandPath:        "",
 		CommandConfigAllowedMageRunCommands:    "",
 		CommandConfigDeployArchiveFolder:       "/srv/magecomm/deploy/",
 		CommandConfigDeployArchiveLatestFile:   "latest.tar.gz",
@@ -134,27 +139,6 @@ func Configure() {
 	}
 }
 
-func IsMageRunCommandAllowed(command string) bool {
-	var allowedCommands []string
-
-	allowedCommandsEnv := GetValue(CommandConfigAllowedMageRunCommands)
-	if allowedCommandsEnv != "" {
-		allowedCommands = strings.Split(allowedCommandsEnv, ",")
-	} else {
-		allowedCommands = defaultAllowedCommands
-	}
-
-	for _, allowedCommand := range allowedCommands {
-		if allowedCommand == command {
-			return true
-		}
-	}
-	// print allowed commands
-	logger.Warnf("Command not allowed, allowed commands are:\n%s \n", strings.Join(allowedCommands, ",\n"))
-	fmt.Printf("%s Command not allowed, allowed commands are:\n%s \n", command, strings.Join(allowedCommands, ",\n"))
-	return false
-}
-
 func GetValue(key string) string {
 	if value, ok := getConfigValue(strings.ToLower(key)); ok {
 		return value
@@ -188,6 +172,81 @@ func getEnvFallback(key string) (string, bool) {
 	return "", false
 }
 
+func ParseCommandArgsMap(jsonString string) map[string][]string {
+	var commandArgsMap map[string][]string
+	if err := json.Unmarshal([]byte(jsonString), &commandArgsMap); err != nil {
+		logger.Warnf("Failed to parse passed in command args JSON: %s", err)
+		return map[string][]string{}
+	}
+	return commandArgsMap
+}
+
 func GetEngine() string {
 	return GetValue(CommandConfigListenerEngine)
+}
+
+func IsMageRunCommandAllowed(command string) bool {
+	var allowedCommands []string
+
+	allowedCommandsEnv := GetValue(CommandConfigAllowedMageRunCommands)
+	if allowedCommandsEnv != "" {
+		allowedCommands = strings.Split(allowedCommandsEnv, ",")
+	} else {
+		allowedCommands = defaultAllowedCommands
+	}
+
+	for _, allowedCommand := range allowedCommands {
+		if allowedCommand == command {
+			return true
+		}
+	}
+	// print allowed commands
+	logger.Warnf("Command not allowed, allowed commands are:\n%s \n", strings.Join(allowedCommands, ",\n"))
+	fmt.Printf("%s Command not allowed, allowed commands are:\n%s \n", command, strings.Join(allowedCommands, ",\n"))
+	return false
+}
+
+func IsRestrictedCommandArgsIncluded(command string, args []string) bool {
+	restrictedCommandArgMap := ParseCommandArgsMap(GetValue(CommandConfigRestrictedMagerunCommandArgs))
+
+	restrictedArgsList, commandExists := restrictedCommandArgMap[command]
+	if !commandExists {
+		return false
+	}
+	// in go it is more performant to use maps with null/"" values to reduce search complexity from a linear (O(n)) to a constant (O(1))
+	// but for the sake of configuration simplicity, we use a mapped list
+	for _, arg := range args {
+		for _, restrictedArg := range restrictedArgsList {
+			if arg == restrictedArg {
+				return true
+			}
+		}
+	}
+
+	return false
+}
+
+func IsRequiredCommandArgsIncluded(command string, args []string) (bool, []string) {
+	requiredCommandArgMap := ParseCommandArgsMap(GetValue(CommandConfigRequiredMagerunCommandArgs))
+	requiredArgsList, commandExists := requiredCommandArgMap[command]
+	if !commandExists {
+		return true, []string{}
+	}
+
+	for i := 0; i < len(requiredArgsList); i++ {
+		requiredArg := requiredArgsList[i]
+		for _, arg := range args {
+			if arg == requiredArg {
+				requiredArgsList = append(requiredArgsList[:i], requiredArgsList[i+1:]...)
+				i-- // adjust the index since we removed an element
+				break
+			}
+		}
+	}
+
+	if len(requiredArgsList) == 0 {
+		return true, []string{}
+	}
+
+	return false, requiredArgsList
 }

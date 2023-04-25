@@ -26,6 +26,24 @@ var MagerunCmd = &cobra.Command{
 			return fmt.Errorf("the command '%s' is not allowed", command)
 		}
 
+		if config_manager.IsRestrictedCommandArgsIncluded(command, args[1:]) {
+			return fmt.Errorf("the command '%s' is not allowed with the following arguments: %s", command, strings.Join(args[1:], " "))
+		}
+
+		if isAllRequiredArgsIncluded, missingRequiredArgs := config_manager.IsRequiredCommandArgsIncluded(command, args[1:]); !isAllRequiredArgsIncluded {
+			prompt := fmt.Sprintf("The command '%s' is missing required arguments: %s. Do you want to run this command and include them?", command, strings.Join(missingRequiredArgs, " "))
+			confirmed, err := PromptUserForConfirmation(prompt)
+			if err != nil {
+				return fmt.Errorf("error while reading user input: %v", err)
+			}
+
+			if confirmed {
+				args = append(args, missingRequiredArgs...)
+			} else {
+				return fmt.Errorf("exiting: the command '%s' cannot be executed without the required arguments: %s", command, strings.Join(missingRequiredArgs, " "))
+			}
+		}
+
 		err := handleMageRunCmdMessage(args)
 		if err != nil {
 			return err

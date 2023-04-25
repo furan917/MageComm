@@ -43,6 +43,14 @@ magecomm_allowed_magerun_commands:
   - cache:flush
   - setup:static-content:deploy
   ...etc
+magecomm_restricted_magerun_command_args:
+  setup:static-content:deploy:
+    - --jobs
+  ...etc
+magecomm_required_magerun_command_args:
+    setup:upgrade:
+        - --keep-generated
+    ...etc
 ```
 
 example config.json:
@@ -69,7 +77,20 @@ example config.json:
     "cache:clean",
     "cache:flush",
     "setup:static-content:deploy"
+    ...etc
   ],
+  magecomm_restricted_magerun_command_args: {
+    "setup:static-content:deploy": [
+      "--jobs"
+    ]
+    ...etc
+  },
+  magecomm_required_magerun_command_args: {
+    "setup:upgrade": [
+      "--keep-generated"
+    ]
+    ...etc
+  }
   ...etc
 }
 ```
@@ -89,7 +110,7 @@ e.g
 
 #### `magecomm magerun`
 
-- A proxy for the magerun command via rmq/sqs with restricted command usage, allowed commands via `MAGECOMM_ALLOWED_MAGERUN_COMMANDS`
+- A proxy for the magerun command via rmq/sqs with restricted command usage, allowed commands via `MAGECOMM_ALLOWED_MAGERUN_COMMANDS` with deeper control of args offered by MAGECOMM_RESTRICTED_MAGERUN_COMMAND_ARGS and MAGECOMM_REQUIRED_MAGERUN_COMMAND_ARGS
 - Engine (sqs|rmq), default sqs, configured in config or by ENV `MAGECOMM_LISTENER_ENGINE`  
 - The command will publish a message and then listen for the outputs return
 
@@ -126,6 +147,8 @@ lowercase for file based config, uppercase for ENV
 - `MAGECOMM_LISTENER_ENGINE`: Listener engine to use (sqs/rmq), default: sqs
 - `MAGECOMM_PUBLISHER_OUTPUT_TIMEOUT`: Timeout for when listening to publisher message output return, default: 60s
 - `MAGECOMM_ALLOWED_MAGERUN_COMMANDS ` comma separated list of commands allowed to be run, fallback to in-code list
+- `MAGECOMM_RESTRICTED_MAGERUN_COMMAND_ARGS` JSON object of commands and their restricted args, default: `{}`
+- `MAGECOMM_REQUIRED_MAGERUN_COMMAND_ARGS` JSON object of commands and their required args, default: `{}`
 - `SQS_AWS_REGION`: AWS region to use for SQS, default: eu-west-1
 - `DEPLOY_ARCHIVE_PATH` path to the folder that contains the archives which are deployed, default: `/srv/magecomm/deploy/`
 - `DEPLOY_ARCHIVE_LATEST_FILE` Filename of the latest archive (symlink), default: `latest.tar.gz`, if no value is set then MageComm will pick the latest created archive
