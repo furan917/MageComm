@@ -23,9 +23,9 @@ func (handler *MagerunHandler) ProcessMessage(messageBody string, correlationID 
 	// Publish the output to the RMQ/SQS output queue
 	publisherClass, err := publisher.MapPublisherToEngine()
 	if err != nil {
-		logger.Warnf("Error publishing message to RMQ/SQS queue:", err)
+		logger.Warnf("Error publishing message to RMQ/SQS queue: %s", err)
 	}
-	logger.Debugf("Publishing output to queue:", queues.MapQueueToOutputQueue(MageRunQueue), "with correlation ID:", correlationID)
+	logger.Debugf("Publishing output to queue: %s with correlation ID: %s", queues.MapQueueToOutputQueue(MageRunQueue), correlationID)
 	_, err = publisherClass.Publish(output, queues.MapQueueToOutputQueue(MageRunQueue), correlationID)
 	if err != nil {
 		return err

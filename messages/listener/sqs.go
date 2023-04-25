@@ -44,7 +44,7 @@ func (listener *SqsListener) processSqsMessage(message *sqs.Message, sqsClient *
 	}
 
 	messageBody := *message.Body
-	logger.Debugf("Message received from", queueName)
+	logger.Debugf("Message received from %s", queueName)
 
 	err = listener.shouldExecutionBeDelayed()
 	if err != nil {
@@ -52,9 +52,7 @@ func (listener *SqsListener) processSqsMessage(message *sqs.Message, sqsClient *
 		return
 	}
 	if err := handler.HandleReceivedMessage(messageBody, queueName, correlationID); err != nil {
-		logger.Warnf("Error handling message, could not process command:", messageBody,
-			" retry attempt:", receiveCount, "of 5",
-			" error:", err)
+		logger.Warnf("Error handling message, could not process command: %v retry attempt: %v of 5, error: %v", messageBody, receiveCount, err)
 		if receiveCount <= handler.MessageRetryLimit {
 			return
 		}
@@ -66,7 +64,7 @@ func (listener *SqsListener) processSqsMessage(message *sqs.Message, sqsClient *
 	})
 
 	if err != nil {
-		logger.Warnf("Error deleting message from SQS:", err)
+		logger.Warnf("Error deleting message from SQS: %v", err)
 	}
 }
 
@@ -86,7 +84,7 @@ func (listener *SqsListener) loopThroughMessages(sqsClient *sqs.SQS, queueName s
 			})
 
 			if err != nil {
-				logger.Warnf("Error receiving message from SQS:", err)
+				logger.Warnf("Error receiving message from SQS: %v", err)
 				time.Sleep(5 * time.Second)
 				return
 			}

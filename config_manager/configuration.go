@@ -125,7 +125,7 @@ func Configure() {
 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
 			logger.Infof("No config file found, reading fully from env vars, this is less secure")
 		} else {
-			logger.Warnf("Failed to read the config file, reading from ENV vars, this is less secure:", err)
+			logger.Warnf("Failed to read the config file, reading from ENV vars, this is less secure: %v", err)
 			return
 		}
 	}

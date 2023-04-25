@@ -9,7 +9,7 @@ import (
 const MessageRetryLimit = 5
 
 func HandleReceivedMessage(messageBody string, queueName string, correlationID string) error {
-	logger.Debugf("Handling message from queue:", queueName)
+	logger.Debugf("Handling message from queue: %s", queueName)
 	var processor MessageHandler
 
 	switch queueName {
