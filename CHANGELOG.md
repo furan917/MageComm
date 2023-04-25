@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.13](https://github.com/furan917/MageComm/compare/v0.0.12...v0.0.13) (2023-04-25)
+
+
+### Bug Fixes
+
+* Include Restricted & Required argument configuration ([ebd175b](https://github.com/furan917/MageComm/commit/ebd175b51bb53367aabb0712409d0ea7bb9ed110))
+
 ## [0.0.12](https://github.com/furan917/MageComm/compare/v0.0.11...v0.0.12) (2023-04-20)
 
 
