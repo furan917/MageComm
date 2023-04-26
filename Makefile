@@ -21,5 +21,8 @@ install: ## Install go binary for your platform
 	go install
 	@echo 'If $$GOPATH/bin is in your PATH, you can run magecomm from anywhere'
 
+test: ## Run tests
+	go test -v ./...
+
 help: ## Additional Details of what this project is
 	@$(cat) README.md
