@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.15](https://github.com/furan917/MageComm/compare/v0.0.14...v0.0.15) (2023-04-26)
+
+
+### Bug Fixes
+
+* SQS was set to short polling, updated to wait 60s ([eb4be08](https://github.com/furan917/MageComm/commit/eb4be08a63cb3cfd0eb13db6a224281b5ae2e3af))
+
 ## [0.0.14](https://github.com/furan917/MageComm/compare/v0.0.13...v0.0.14) (2023-04-25)
 
 
