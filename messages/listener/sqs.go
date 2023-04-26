@@ -77,8 +77,8 @@ func (listener *SqsListener) loopThroughMessages(sqsClient *sqs.SQS, queueName s
 			result, err := sqsClient.ReceiveMessageWithContext(ctx, &sqs.ReceiveMessageInput{
 				QueueUrl:              aws.String(queueURL),
 				MaxNumberOfMessages:   aws.Int64(1),
-				VisibilityTimeout:     aws.Int64(60),
-				WaitTimeSeconds:       aws.Int64(0),
+				VisibilityTimeout:     aws.Int64(120),
+				WaitTimeSeconds:       aws.Int64(60),
 				AttributeNames:        []*string{aws.String("All")},
 				MessageAttributeNames: []*string{aws.String("CorrelationID")},
 			})
