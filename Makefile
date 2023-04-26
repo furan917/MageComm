@@ -17,5 +17,9 @@ build-all: ## Build go binary for all supported platforms
 	&& GOOS=darwin GOARCH=amd64 go build -o magecomm-darwin-amd64 \
 	&& GOOS=darwin GOARCH=arm64 go build -o magecomm-darwin-arm64
 
+install: ## Install go binary for your platform
+	go install
+	@echo 'If $$GOPATH/bin is in your PATH, you can run magecomm from anywhere'
+
 help: ## Additional Details of what this project is
 	@$(cat) README.md
