@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.0](https://github.com/furan917/MageComm/compare/v0.0.15...v0.1.0) (2023-04-30)
+
+
+### Features
+
+* Fixed SQS and added slack notification ability ([3e4a869](https://github.com/furan917/MageComm/commit/3e4a869aaf5828f024707e39ec10d2c187c69836))
+
 ## [0.0.15](https://github.com/furan917/MageComm/compare/v0.0.14...v0.0.15) (2023-04-26)
 
 
