@@ -13,6 +13,6 @@ var DeployCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		filepath := args[0]
 		// Implement your deployment logic here
-		fmt.Printf("Deploying file: %s\n", filepath)
+		fmt.Printf("WIP: Functionality not yet built: %s\n", filepath)
 	},
 }

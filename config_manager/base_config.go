@@ -2,7 +2,6 @@ package config_manager
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/spf13/viper"
 	"magecomm/logger"
 	"os"
@@ -11,8 +10,8 @@ import (
 )
 
 const (
-	CommandConfigLogPath                      = "magecomm_log_path"
-	CommandConfigLogLevel                     = "magecomm_log_level"
+	ConfigLogPath                             = "magecomm_log_path"
+	ConfigLogLevel                            = "magecomm_log_level"
 	CommandConfigMaxOperationalCpuLimit       = "magecomm_max_operational_cpu_limit"
 	CommandConfigMaxOperationalMemoryLimit    = "magecomm_max_operational_memory_limit"
 	CommandConfigEnvironment                  = "magecomm_environment"
@@ -26,6 +25,15 @@ const (
 	CommandConfigDeployArchiveFolder          = "magecomm_deploy_archive_path"
 	CommandConfigDeployArchiveLatestFile      = "magecomm_deploy_archive_latest_file"
 
+	// Slack
+	ConfigSlackEnabled         = "magecomm_slack_enabled"
+	ConfigSlackWebhookUrl      = "magecomm_slack_webhook_url"
+	ConfigSlackWebhookChannel  = "magecomm_slack_webhook_channel"
+	ConfigSlackWebhookUserName = "magecomm_slack_webhook_username"
+	ConfigSlackAppToken        = "magecomm_slack_app_token"
+	ConfigSlackAppChannel      = "magecomm_slack_app_channel"
+	ConfigSlackAppUserName     = "magecomm_slack_app_username"
+
 	//SQS
 	ConfigSQSRegion = "magecomm_sqs_aws_region"
 
@@ -38,11 +46,13 @@ const (
 	ConfigRabbitMQVhost = "magecomm_rmq_vhost"
 )
 
+var trueValues = []string{"true", "1", "yes", "y"}
+
 func getDefault(key string) string {
 	// we cant use viper.setDefault due to the order of operations we need: Config > Env > Default
 	defaults := map[string]string{
-		CommandConfigLogPath:                   "",
-		CommandConfigLogLevel:                  "warn",
+		ConfigLogPath:                          "",
+		ConfigLogLevel:                         "warn",
 		CommandConfigMaxOperationalCpuLimit:    "80",
 		CommandConfigMaxOperationalMemoryLimit: "80",
 		CommandConfigEnvironment:               "default",
@@ -53,6 +63,7 @@ func getDefault(key string) string {
 		CommandConfigAllowedMageRunCommands:    "",
 		CommandConfigDeployArchiveFolder:       "/srv/magecomm/deploy/",
 		CommandConfigDeployArchiveLatestFile:   "latest.tar.gz",
+		ConfigSlackEnabled:                     "false",
 		ConfigSQSRegion:                        "eu-west-1",
 		ConfigRabbitMQTLS:                      "false",
 		ConfigRabbitMQUser:                     "guest",
@@ -67,49 +78,6 @@ func getDefault(key string) string {
 	}
 
 	return ""
-}
-
-var defaultAllowedCommands = []string{
-	"admin:token:create",
-	"admin:user:unlock",
-	"app:config:import",
-	"braintree:migrate",
-	"cache:clean",
-	"cache:disable",
-	"cache:enable",
-	"cache:flush",
-	"catalog:images:resize",
-	"catalog:product:attributes:cleanup",
-	"cms:block:toggle",
-	"cms:wysiwyg:restrict",
-	"cron:install",
-	"cron:remove",
-	"cron:run",
-	"dev:query-log:disable",
-	"dev:query-log:enable",
-	"downloadable:domains:add",
-	"downloadable:domains:remove",
-	"inchoo:catalog:footwear-link-update",
-	"index:trigger:recreate",
-	"indexer:reindex",
-	"indexer:reset",
-	"indexer:set-mode",
-	"klevu:images",
-	"klevu:rating",
-	"klevu:sync:category",
-	"klevu:sync:cmspages",
-	"klevu:syncdata",
-	"klevu:syncstore:storecode",
-	"maintenance:allow-ips",
-	"maintenance:disable",
-	"maintenance:enable",
-	"media:dump",
-	"msp:security:recaptcha:disable",
-	"queue:consumers:start",
-	"sys:cron:run",
-	"sys:maintenance",
-	"yotpo:order",
-	"yotpo:sync",
 }
 
 func Configure() {
@@ -130,13 +98,23 @@ func Configure() {
 		}
 	}
 
-	if logPath := GetValue(CommandConfigLogPath); logPath != "" {
+	if logPath := GetValue(ConfigLogPath); logPath != "" {
 		logger.ConfigureLogPath(logPath)
 	}
 
-	if logLevel := GetValue(CommandConfigLogLevel); logLevel != "" {
+	if logLevel := GetValue(ConfigLogLevel); logLevel != "" {
 		logger.SetLogLevel(logLevel)
 	}
+}
+
+func GetBoolValue(key string) bool {
+	value := GetValue(key)
+	for _, v := range trueValues {
+		if strings.ToLower(value) == v {
+			return true
+		}
+	}
+	return false
 }
 
 func GetValue(key string) string {
@@ -183,70 +161,4 @@ func ParseCommandArgsMap(jsonString string) map[string][]string {
 
 func GetEngine() string {
 	return GetValue(CommandConfigListenerEngine)
-}
-
-func IsMageRunCommandAllowed(command string) bool {
-	var allowedCommands []string
-
-	allowedCommandsEnv := GetValue(CommandConfigAllowedMageRunCommands)
-	if allowedCommandsEnv != "" {
-		allowedCommands = strings.Split(allowedCommandsEnv, ",")
-	} else {
-		allowedCommands = defaultAllowedCommands
-	}
-
-	for _, allowedCommand := range allowedCommands {
-		if allowedCommand == command {
-			return true
-		}
-	}
-	// print allowed commands
-	logger.Warnf("Command not allowed, allowed commands are:\n%s \n", strings.Join(allowedCommands, ",\n"))
-	fmt.Printf("%s Command not allowed, allowed commands are:\n%s \n", command, strings.Join(allowedCommands, ",\n"))
-	return false
-}
-
-func IsRestrictedCommandArgsIncluded(command string, args []string) bool {
-	restrictedCommandArgMap := ParseCommandArgsMap(GetValue(CommandConfigRestrictedMagerunCommandArgs))
-
-	restrictedArgsList, commandExists := restrictedCommandArgMap[command]
-	if !commandExists {
-		return false
-	}
-	// in go it is more performant to use maps with null/"" values to reduce search complexity from a linear (O(n)) to a constant (O(1))
-	// but for the sake of configuration simplicity, we use a mapped list
-	for _, arg := range args {
-		for _, restrictedArg := range restrictedArgsList {
-			if arg == restrictedArg {
-				return true
-			}
-		}
-	}
-
-	return false
-}
-
-func IsRequiredCommandArgsIncluded(command string, args []string) (bool, []string) {
-	requiredCommandArgMap := ParseCommandArgsMap(GetValue(CommandConfigRequiredMagerunCommandArgs))
-	requiredArgsList, commandExists := requiredCommandArgMap[command]
-	if !commandExists {
-		return true, []string{}
-	}
-
-	for i := 0; i < len(requiredArgsList); i++ {
-		requiredArg := requiredArgsList[i]
-		for _, arg := range args {
-			if arg == requiredArg {
-				requiredArgsList = append(requiredArgsList[:i], requiredArgsList[i+1:]...)
-				i-- // adjust the index since we removed an element
-				break
-			}
-		}
-	}
-
-	if len(requiredArgsList) == 0 {
-		return true, []string{}
-	}
-
-	return false, requiredArgsList
 }

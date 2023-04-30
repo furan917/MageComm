@@ -28,13 +28,17 @@ magecomm_max_operational_cpu_limit: 80
 magecomm_max_operational_memory_limit: 80
 magecomm_environment: dev
 magecomm_listener_engine: sqs
-sqs_aws_region: eu-west-1
-rmq_tls: false
-rmq_user: guest
-rmq_pass: guest
-rmq_host: localhost
-rmq_port: 5672
-rmq_vhost: /
+magecomm_sqs_aws_region: eu-west-1
+magecomm_rmq_tls: false
+magecomm_rmq_user: guest
+magecomm_rmq_pass: guest
+magecomm_rmq_host: localhost
+magecomm_rmq_port: 5672
+magecomm_rmq_vhost: /
+magecomm_slack_enabled: "true"
+magecomm_slack_webhook_url: https://hooks.slack.com/services/XXXXX/XXXXX/XXXXX
+magecomm_slack_channel: "magecomm"
+magecomm_slack_username: "magecomm"
 magecomm_listeners:
   - magerun
   - deploy
@@ -62,13 +66,17 @@ example config.json:
   "magecomm_max_operational_memory_limit": 80,
   "magecomm_environment": "dev",
   "magecomm_listener_engine": "sqs",
-  "sqs_aws_region": "eu-west-1",
-  "rmq_tls": false,
-  "rmq_user": "guest",
-  "rmq_pass": "guest",
-  "rmq_host": "localhost",
-  "rmq_port": 5672,
-  "rmq_vhost": "/",
+  "magecomm_sqs_aws_region": "eu-west-1",
+  "magecomm_rmq_tls": false,
+  "magecomm_rmq_user": "guest",
+  "magecomm_rmq_pass": "guest",
+  "magecomm_rmq_host": "localhost",
+  "magecomm_rmq_port": 5672,
+  "magecomm_rmq_vhost": "/",
+  "magecomm_slack_enabled": "true"
+  "magecomm_slack_webhook_url": "https://hooks.slack.com/services/XXXXX/XXXXX/XXXXX"
+  "magecomm_slack_channel": "magecomm"
+  "magecomm_slack_username": "magecomm"
   "magecomm_listeners": [
     "magerun",
     "deploy"
@@ -136,7 +144,9 @@ e.g
 ## Configuration
 
 The tool can be configured using a yaml or json config file at `/etc/magecomm/`(unix) / `%APPDATA%\magecomm\`(windows)  or by environment variables.
-lowercase for file based config, uppercase for ENV
+lowercase for file based config, uppercase for ENV.
+
+The tool supports slack command run notifications via Webhook or App integration
 
 - `MAGECOMM_LOG_PATH`: Path to log file, default: SYSLOG
 - `MAGECOMM_LOG_LEVEL`: Log level, default: WARN, options (TRACE, DEBUG, INFO, WARN, ERROR, FATAL, PANIC)
@@ -149,15 +159,24 @@ lowercase for file based config, uppercase for ENV
 - `MAGECOMM_ALLOWED_MAGERUN_COMMANDS ` comma separated list of commands allowed to be run, fallback to in-code list
 - `MAGECOMM_RESTRICTED_MAGERUN_COMMAND_ARGS` JSON object of commands and their restricted args, default: `{}`
 - `MAGECOMM_REQUIRED_MAGERUN_COMMAND_ARGS` JSON object of commands and their required args, default: `{}`
-- `SQS_AWS_REGION`: AWS region to use for SQS, default: eu-west-1
-- `DEPLOY_ARCHIVE_PATH` path to the folder that contains the archives which are deployed, default: `/srv/magecomm/deploy/`
-- `DEPLOY_ARCHIVE_LATEST_FILE` Filename of the latest archive (symlink), default: `latest.tar.gz`, if no value is set then MageComm will pick the latest created archive
-- `RMQ_HOST` Default: `localhost`
-- `RMQ_PORT` Default: `5672`
-- `RMQ_USER` Default: ``
-- `RMQ_PASS` Default: ``
-- `RMQ_TLS`  Default: `false`
-- `RMQ_VHOST` Default: `/`
+- `MAGECOMM_SQS_AWS_REGION`: AWS region to use for SQS, default: eu-west-1
+- `MAGECOMM_DEPLOY_ARCHIVE_PATH` path to the folder that contains the archives which are deployed, default: `/srv/magecomm/deploy/`
+- `MAGECOMM_DEPLOY_ARCHIVE_LATEST_FILE` Filename of the latest archive (symlink), default: `latest.tar.gz`, if no value is set then MageComm will pick the latest created archive
+- `MAGECOMM_RMQ_HOST` Default: `localhost`
+- `MAGECOMM_RMQ_PORT` Default: `5672`
+- `MAGECOMM_RMQ_USER` Default: ``
+- `MAGECOMM_RMQ_PASS` Default: ``
+- `MAGECOMM_RMQ_TLS`  Default: `false`
+- `MAGECOMM_RMQ_VHOST` Default: `/`
+- `MAGECOMM_SLACK_ENABLED` Default: `false`, (true|false), if true you must configure the WEBHOOK or APP configurations to work
+- `MAGECOMM_SLACK_WEBHOOK_URL` Default: ``
+- `MAGECOMM_SLACK_WEBHOOK_CHANNEL` Default: ``
+- `MAGECOMM_SLACK_WEBHOOK_USERNAME` Default: ``
+- `MAGECOMM_SLACK_APP_TOKEN` Default: ``
+- `MAGECOMM_SLACK_CHANNEL` Default: ``
+- `MAGECOMM_SLACK_USERNAME` Default: ``
+
+- ``
 
 If using SQS the Pod/Instance this is deployed on must have an IAM role with the following permissions:
 - `sqs:ReceiveMessage`
