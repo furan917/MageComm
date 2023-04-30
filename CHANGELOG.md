@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.1](https://github.com/furan917/MageComm/compare/v0.1.0...v0.1.1) (2023-04-30)
+
+
+### Bug Fixes
+
+* readme showed deploy command existed ([65cc4a7](https://github.com/furan917/MageComm/commit/65cc4a7e0fd68a143feba505bd49babc2281ba7a))
+
 ## [0.1.0](https://github.com/furan917/MageComm/compare/v0.0.15...v0.1.0) (2023-04-30)
 
 
