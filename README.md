@@ -203,7 +203,7 @@ If using SQS the Pod/Instance this is deployed on must have an IAM role with the
 `magecomm magerun setup:upgrade --keep-generated`  
 
 
-3. Deploy a gzipped file:  
+3. Deploy a gzipped file (WIP, not yet implemented):  
 `magecomm deploy path/to/archive.gz`    
 
 
