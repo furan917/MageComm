@@ -17,7 +17,6 @@ var DeployCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		fileName := args[0]
-		// Implement your deployment logic here
 		fmt.Printf("Deploying file: %s\n", fileName)
 		err := handleDeployCmdMessage(fileName)
 		if err != nil {

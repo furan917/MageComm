@@ -11,21 +11,22 @@ type MagerunHandler struct {
 	Publisher publisher.MessagePublisher
 }
 
+var MageRunQueue = "magerun"
+
 func (handler *MagerunHandler) ProcessMessage(messageBody string, correlationID string) error {
 
 	output, err := magerun.HandleMagerunCommand(messageBody)
 	if err != nil {
-		//ensure that any error is passed back to the caller
 		output = output + err.Error()
 	}
 
 	// Publish the output to the RMQ/SQS output queue
 	publisherClass, err := publisher.MapPublisherToEngine()
 	if err != nil {
-		logger.Warnf("Error publishing message to RMQ/SQS queue:", err)
+		logger.Warnf("Error publishing message to RMQ/SQS queue: %s", err)
 	}
-	logger.Debugf("Publishing output to queue:", queues.MapQueueToOutputQueue(magerun.MageRunQueue), "with correlation ID:", correlationID)
-	_, err = publisherClass.Publish(output, queues.MapQueueToOutputQueue(magerun.MageRunQueue), correlationID)
+	logger.Debugf("Publishing output to queue: %s with correlation ID: %s", queues.MapQueueToOutputQueue(MageRunQueue), correlationID)
+	_, err = publisherClass.Publish(output, queues.MapQueueToOutputQueue(MageRunQueue), correlationID)
 	if err != nil {
 		return err
 	}

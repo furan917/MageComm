@@ -144,7 +144,7 @@ func (handler *DeployHandler) publishOutput(output string, correlationID string)
 
 func (handler *DeployHandler) fetchAndUnpack(fileName string) error {
 	logger.Debugf("Fetching and unpacking file:", fileName)
-	//todo:: update fetch and Uppack to use S3/Github/Bitbucket/Archive on filesystem
+	//todo:: update fetch and Uppack to use S3/Github/Bitbucket/Archive on filesystem - create package to handle these configurable options
 	source := config_manager.GetValue("deploy_source")
 	resp, err := http.Get(source)
 	if err != nil {

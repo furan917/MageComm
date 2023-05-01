@@ -9,7 +9,7 @@ import (
 
 func MapPublisherToEngine() (MessagePublisher, error) {
 	engine := config_manager.GetEngine()
-	logger.Debugf("Mapping message to engine:", engine)
+	logger.Debugf("Mapping message to engine: %v", engine)
 	var publisherClass MessagePublisher
 
 	switch engine {

@@ -11,7 +11,7 @@ import (
 )
 
 func HandleOutputByCorrelationID(correlationID string, queueName string) (string, error) {
-	logger.Debugf("Listening for output with Correlation ID:", correlationID)
+	logger.Debugf("Listening for output with Correlation ID: %s", correlationID)
 
 	var wg sync.WaitGroup
 	stopLoading := make(chan bool)

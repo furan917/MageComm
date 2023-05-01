@@ -9,7 +9,7 @@ import (
 
 func MapListenerToEngine() (MessageListener, error) {
 	engine := config_manager.GetEngine()
-	logger.Debugf("Mapping message to engine:", engine)
+	logger.Debugf("Mapping message to engine: %s", engine)
 
 	var listenerClass MessageListener
 

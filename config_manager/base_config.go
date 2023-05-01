@@ -1,7 +1,7 @@
 package config_manager
 
 import (
-	"fmt"
+	"encoding/json"
 	"github.com/spf13/viper"
 	"magecomm/logger"
 	"os"
@@ -10,17 +10,29 @@ import (
 )
 
 const (
-	CommandConfigLogPath                   = "magecomm_log_path"
-	CommandConfigLogLevel                  = "magecomm_log_level"
-	CommandConfigMaxOperationalCpuLimit    = "magecomm_max_operational_cpu_limit"
-	CommandConfigMaxOperationalMemoryLimit = "magecomm_max_operational_memory_limit"
-	CommandConfigEnvironment               = "magecomm_environment"
-	CommandConfigListenerEngine            = "magecomm_listener_engine"
-	CommandConfigListeners                 = "magecomm_listeners"
-	CommandConfigPublisherOutputTimeout    = "magecomm_publisher_output_timeout"
-	CommandConfigAllowedMageRunCommands    = "magecomm_allowed_magerun_commands"
-	CommandConfigDeployArchiveFolder       = "magecomm_deploy_archive_path"
-	CommandConfigDeployArchiveLatestFile   = "magecomm_deploy_archive_latest_file"
+	ConfigLogPath                             = "magecomm_log_path"
+	ConfigLogLevel                            = "magecomm_log_level"
+	CommandConfigMaxOperationalCpuLimit       = "magecomm_max_operational_cpu_limit"
+	CommandConfigMaxOperationalMemoryLimit    = "magecomm_max_operational_memory_limit"
+	CommandConfigEnvironment                  = "magecomm_environment"
+	CommandConfigListenerEngine               = "magecomm_listener_engine"
+	CommandConfigListeners                    = "magecomm_listeners"
+	CommandConfigPublisherOutputTimeout       = "magecomm_publisher_output_timeout"
+	CommandConfigMageRunCommandPath           = "magecomm_magerun_command_path"
+	CommandConfigAllowedMageRunCommands       = "magecomm_allowed_magerun_commands"
+	CommandConfigRestrictedMagerunCommandArgs = "magecomm_restricted_magerun_command_args"
+	CommandConfigRequiredMagerunCommandArgs   = "magecomm_required_magerun_command_args"
+	CommandConfigDeployArchiveFolder          = "magecomm_deploy_archive_path"
+	CommandConfigDeployArchiveLatestFile      = "magecomm_deploy_archive_latest_file"
+
+	// Slack
+	ConfigSlackEnabled         = "magecomm_slack_enabled"
+	ConfigSlackWebhookUrl      = "magecomm_slack_webhook_url"
+	ConfigSlackWebhookChannel  = "magecomm_slack_webhook_channel"
+	ConfigSlackWebhookUserName = "magecomm_slack_webhook_username"
+	ConfigSlackAppToken        = "magecomm_slack_app_token"
+	ConfigSlackAppChannel      = "magecomm_slack_app_channel"
+	ConfigSlackAppUserName     = "magecomm_slack_app_username"
 
 	//SQS
 	ConfigSQSRegion = "magecomm_sqs_aws_region"
@@ -34,20 +46,24 @@ const (
 	ConfigRabbitMQVhost = "magecomm_rmq_vhost"
 )
 
+var trueValues = []string{"true", "1", "yes", "y"}
+
 func getDefault(key string) string {
 	// we cant use viper.setDefault due to the order of operations we need: Config > Env > Default
 	defaults := map[string]string{
-		CommandConfigLogPath:                   "",
-		CommandConfigLogLevel:                  "warn",
+		ConfigLogPath:                          "",
+		ConfigLogLevel:                         "warn",
 		CommandConfigMaxOperationalCpuLimit:    "80",
 		CommandConfigMaxOperationalMemoryLimit: "80",
 		CommandConfigEnvironment:               "default",
 		CommandConfigListenerEngine:            "sqs",
 		CommandConfigListeners:                 "",
 		CommandConfigPublisherOutputTimeout:    "60",
+		CommandConfigMageRunCommandPath:        "",
 		CommandConfigAllowedMageRunCommands:    "",
 		CommandConfigDeployArchiveFolder:       "/srv/magecomm/deploy/",
 		CommandConfigDeployArchiveLatestFile:   "latest.tar.gz",
+		ConfigSlackEnabled:                     "false",
 		ConfigSQSRegion:                        "eu-west-1",
 		ConfigRabbitMQTLS:                      "false",
 		ConfigRabbitMQUser:                     "guest",
@@ -64,49 +80,6 @@ func getDefault(key string) string {
 	return ""
 }
 
-var defaultAllowedCommands = []string{
-	"admin:token:create",
-	"admin:user:unlock",
-	"app:config:import",
-	"braintree:migrate",
-	"cache:clean",
-	"cache:disable",
-	"cache:enable",
-	"cache:flush",
-	"catalog:images:resize",
-	"catalog:product:attributes:cleanup",
-	"cms:block:toggle",
-	"cms:wysiwyg:restrict",
-	"cron:install",
-	"cron:remove",
-	"cron:run",
-	"dev:query-log:disable",
-	"dev:query-log:enable",
-	"downloadable:domains:add",
-	"downloadable:domains:remove",
-	"inchoo:catalog:footwear-link-update",
-	"index:trigger:recreate",
-	"indexer:reindex",
-	"indexer:reset",
-	"indexer:set-mode",
-	"klevu:images",
-	"klevu:rating",
-	"klevu:sync:category",
-	"klevu:sync:cmspages",
-	"klevu:syncdata",
-	"klevu:syncstore:storecode",
-	"maintenance:allow-ips",
-	"maintenance:disable",
-	"maintenance:enable",
-	"media:dump",
-	"msp:security:recaptcha:disable",
-	"queue:consumers:start",
-	"sys:cron:run",
-	"sys:maintenance",
-	"yotpo:order",
-	"yotpo:sync",
-}
-
 func Configure() {
 	viper.SetConfigName("config")
 	if runtime.GOOS == "windows" {
@@ -120,38 +93,27 @@ func Configure() {
 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
 			logger.Infof("No config file found, reading fully from env vars, this is less secure")
 		} else {
-			logger.Warnf("Failed to read the config file, reading from ENV vars, this is less secure:", err)
+			logger.Warnf("Failed to read the config file, reading from ENV vars, this is less secure: %v", err)
 			return
 		}
 	}
 
-	if logPath := GetValue(CommandConfigLogPath); logPath != "" {
+	if logPath := GetValue(ConfigLogPath); logPath != "" {
 		logger.ConfigureLogPath(logPath)
 	}
 
-	if logLevel := GetValue(CommandConfigLogLevel); logLevel != "" {
+	if logLevel := GetValue(ConfigLogLevel); logLevel != "" {
 		logger.SetLogLevel(logLevel)
 	}
 }
 
-func IsMageRunCommandAllowed(command string) bool {
-	var allowedCommands []string
-
-	allowedCommandsEnv := GetValue(CommandConfigAllowedMageRunCommands)
-	if allowedCommandsEnv != "" {
-		allowedCommands = strings.Split(allowedCommandsEnv, ",")
-	} else {
-		allowedCommands = defaultAllowedCommands
-	}
-
-	for _, allowedCommand := range allowedCommands {
-		if allowedCommand == command {
+func GetBoolValue(key string) bool {
+	value := GetValue(key)
+	for _, v := range trueValues {
+		if strings.ToLower(value) == v {
 			return true
 		}
 	}
-	// print allowed commands
-	logger.Warnf("Command not allowed, allowed commands are:\n%s \n", strings.Join(allowedCommands, ",\n"))
-	fmt.Printf("%s Command not allowed, allowed commands are:\n%s \n", command, strings.Join(allowedCommands, ",\n"))
 	return false
 }
 
@@ -186,6 +148,15 @@ func getEnvFallback(key string) (string, bool) {
 		return value, true
 	}
 	return "", false
+}
+
+func ParseCommandArgsMap(jsonString string) map[string][]string {
+	var commandArgsMap map[string][]string
+	if err := json.Unmarshal([]byte(jsonString), &commandArgsMap); err != nil {
+		logger.Warnf("Failed to parse passed in command args JSON: %s", err)
+		return map[string][]string{}
+	}
+	return commandArgsMap
 }
 
 func GetEngine() string {

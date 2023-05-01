@@ -11,11 +11,18 @@ build: ## Build go binary for your platform
 
 build-all: ## Build go binary for all supported platforms
 	@echo "Building for all supported platforms"
-	GOOS=linux GOARCH=amd64 go build -o magecomm-linux-amd64
-    GOOS=linux GOARCH=arm64 go build -o magecomm-linux-arm64
-	GOOS=windows GOARCH=amd64 go build -o magecomm-windows-amd64.exe
-	GOOS=darwin GOARCH=amd64 go build -o magecomm-darwin-amd64
-	GOOS=darwin GOARCH=arm64 go build -o magecomm-darwin-arm64
+	GOOS=linux GOARCH=amd64 go build -o magecomm-linux-amd64 \
+    && GOOS=linux GOARCH=arm64 go build -o magecomm-linux-arm64 \
+	&& GOOS=windows GOARCH=amd64 go build -o magecomm-windows-amd64.exe \
+	&& GOOS=darwin GOARCH=amd64 go build -o magecomm-darwin-amd64 \
+	&& GOOS=darwin GOARCH=arm64 go build -o magecomm-darwin-arm64
+
+install: ## Install go binary for your platform
+	go install
+	@echo 'If $$GOPATH/bin is in your PATH, you can run magecomm from anywhere'
+
+test: ## Run tests
+	go test -v ./...
 
 help: ## Additional Details of what this project is
 	@$(cat) README.md

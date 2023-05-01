@@ -36,14 +36,15 @@ func (listener *SqsListener) shouldExecutionBeDelayed() error {
 }
 
 func (listener *SqsListener) processSqsMessage(message *sqs.Message, sqsClient *sqs.SQS, queueName string, queueURL string) {
-	correlationID := *message.MessageAttributes["CorrelationID"].StringValue
+	messageAttributes := message.MessageAttributes
+	correlationID := *messageAttributes["CorrelationID"].StringValue
 	receiveCount, err := strconv.Atoi(*message.Attributes["ApproximateReceiveCount"])
 	if err != nil {
 		logger.Warnf("Error parsing ApproximateReceiveCount attribute: %v", err)
 	}
 
 	messageBody := *message.Body
-	logger.Debugf("Message received from", queueName)
+	logger.Debugf("Message received from %s", queueName)
 
 	err = listener.shouldExecutionBeDelayed()
 	if err != nil {
@@ -51,9 +52,7 @@ func (listener *SqsListener) processSqsMessage(message *sqs.Message, sqsClient *
 		return
 	}
 	if err := handler.HandleReceivedMessage(messageBody, queueName, correlationID); err != nil {
-		logger.Warnf("Error handling message, could not process command:", messageBody,
-			" retry attempt:", receiveCount, "of 5",
-			" error:", err)
+		logger.Warnf("Error handling message, could not process command: %v retry attempt: %v of 5, error: %v", messageBody, receiveCount, err)
 		if receiveCount <= handler.MessageRetryLimit {
 			return
 		}
@@ -65,7 +64,7 @@ func (listener *SqsListener) processSqsMessage(message *sqs.Message, sqsClient *
 	})
 
 	if err != nil {
-		logger.Warnf("Error deleting message from SQS:", err)
+		logger.Warnf("Error deleting message from SQS: %v", err)
 	}
 }
 
@@ -76,22 +75,22 @@ func (listener *SqsListener) loopThroughMessages(sqsClient *sqs.SQS, queueName s
 			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 			defer cancel()
 			result, err := sqsClient.ReceiveMessageWithContext(ctx, &sqs.ReceiveMessageInput{
-				QueueUrl:            aws.String(queueURL),
-				MaxNumberOfMessages: aws.Int64(1),
-				VisibilityTimeout:   aws.Int64(60),
-				WaitTimeSeconds:     aws.Int64(0),
-				AttributeNames:      aws.StringSlice([]string{"All"}),
+				QueueUrl:              aws.String(queueURL),
+				MaxNumberOfMessages:   aws.Int64(1),
+				VisibilityTimeout:     aws.Int64(120),
+				WaitTimeSeconds:       aws.Int64(20),
+				AttributeNames:        []*string{aws.String("All")},
+				MessageAttributeNames: []*string{aws.String("CorrelationID")},
 			})
 
 			if err != nil {
-				logger.Warnf("Error receiving message from SQS:", err)
+				logger.Warnf("Error receiving message from SQS: %v", err)
 				time.Sleep(5 * time.Second)
 				return
 			}
 
 			if len(result.Messages) == 0 {
-				logger.Warnf("No messages available. Waiting...")
-				time.Sleep(5 * time.Second)
+				time.Sleep(1 * time.Second)
 				return
 			}
 
@@ -154,14 +153,10 @@ func (listener *SqsListener) ListenForOutputByCorrelationID(queueName string, co
 	queueURL, err := services.CreateSQSQueueIfNotExists(sqsClient, queueName)
 
 	input := &sqs.ReceiveMessageInput{
-		QueueUrl: aws.String(queueURL),
-		AttributeNames: []*string{
-			aws.String("All"),
-		},
-		MessageAttributeNames: []*string{
-			aws.String("CorrelationId"),
-		},
-		WaitTimeSeconds: aws.Int64(20),
+		QueueUrl:              aws.String(queueURL),
+		AttributeNames:        []*string{aws.String("All")},
+		MessageAttributeNames: []*string{aws.String("CorrelationID")},
+		WaitTimeSeconds:       aws.Int64(20),
 	}
 
 	for {
@@ -171,7 +166,8 @@ func (listener *SqsListener) ListenForOutputByCorrelationID(queueName string, co
 		}
 
 		for _, msg := range resp.Messages {
-			if msg.MessageAttributes["CorrelationId"].StringValue != nil && *msg.MessageAttributes["CorrelationId"].StringValue == correlationID {
+
+			if msg.MessageAttributes["CorrelationID"].StringValue != nil && *msg.MessageAttributes["CorrelationID"].StringValue == correlationID {
 				output := *msg.Body
 				_, err := sqsClient.DeleteMessage(&sqs.DeleteMessageInput{
 					QueueUrl:      aws.String(queueURL),

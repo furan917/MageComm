@@ -33,7 +33,7 @@ func (listener *RmqListener) shouldExecutionBeDelayed() error {
 }
 
 func (listener *RmqListener) processRmqMessage(message amqp.Delivery, channel *amqp.Channel, queueName string) {
-	logger.Debugf("Message received from", queueName)
+	logger.Debugf("Message received from %s", queueName)
 	correlationID := message.CorrelationId
 	if message.Headers == nil {
 		message.Headers = make(amqp.Table)
