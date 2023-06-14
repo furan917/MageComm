@@ -34,10 +34,13 @@ func ExecuteMagerunCommand(args []string) (string, error) {
 	mageRunCmdPath := getMageRunCommand()
 	logger.Infof("Executing command %s with args: %v\n", mageRunCmdPath, args)
 
-	notifier := notifictions.DefaultSlackNotifier
-	err := notifier.Notify(fmt.Sprintf("Executing command: %v on environment: %s", strings.Join(args, " "), config_manager.GetValue(config_manager.CommandConfigEnvironment)))
-	if err != nil {
-		logger.Warnf("Failed to send slack notification: %v\n", err)
+	if config_manager.GetBoolValue(config_manager.ConfigSlackEnabled) {
+		logger.Infof("Slack notification is enabled, sending notification")
+		notifier := notifictions.DefaultSlackNotifier
+		err := notifier.Notify(fmt.Sprintf("Executing command: %v on environment: %s", strings.Join(args, " "), config_manager.GetValue(config_manager.CommandConfigEnvironment)))
+		if err != nil {
+			logger.Warnf("Failed to send slack notification: %v\n", err)
+		}
 	}
 
 	cmd := exec.Command(mageRunCmdPath, args...)
@@ -46,7 +49,7 @@ func ExecuteMagerunCommand(args []string) (string, error) {
 	cmd.Stdout = &stdoutBuffer
 	cmd.Stderr = &stderrBuffer
 
-	err = cmd.Run()
+	err := cmd.Run()
 	if err != nil {
 		return "", fmt.Errorf("error executing magerun command: %s", err)
 	}

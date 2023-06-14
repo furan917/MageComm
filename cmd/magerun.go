@@ -72,8 +72,6 @@ func handleMageRunCmdMessage(args []string) error {
 
 	if output != "" {
 		fmt.Println(output)
-	} else {
-		fmt.Println("Command executed, but no output was returned")
 	}
 
 	return nil

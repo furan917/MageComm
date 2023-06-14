@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.1.2](https://github.com/furan917/MageComm/compare/v0.1.1...v0.1.2) (2023-06-14)
+
+
+### Bug Fixes
+
+* Updating CTX wait timeout of SQS ([99398e8](https://github.com/furan917/MageComm/commit/99398e805f16a8346b4c4bd4c5f36e03998131e5))
+
+## [0.1.1](https://github.com/furan917/MageComm/compare/v0.1.0...v0.1.1) (2023-04-30)
+
+
+### Bug Fixes
+
+* readme showed deploy command existed ([65cc4a7](https://github.com/furan917/MageComm/commit/65cc4a7e0fd68a143feba505bd49babc2281ba7a))
+
 ## [0.1.0](https://github.com/furan917/MageComm/compare/v0.0.15...v0.1.0) (2023-04-30)
 
 

@@ -17,8 +17,10 @@ func HandleReceivedMessage(messageBody string, queueName string, correlationID s
 		processor = &MagerunHandler{
 			Publisher: publisher.Publisher,
 		}
+	case "magerun_output":
+		processor = &MagerunOutputHandler{}
 	case "deploy":
-		logger.Infof("Deploying...")
+		logger.Infof("Deploy not yet implemented...")
 		// assign the appropriate processor here
 	default:
 		return fmt.Errorf("no known message handler for queue: %s", queueName)
