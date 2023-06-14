@@ -72,7 +72,7 @@ func (listener *SqsListener) processSqsMessage(message *sqs.Message, sqsClient *
 func (listener *SqsListener) loopThroughMessages(sqsClient *sqs.SQS, queueName string, queueURL string) {
 	for {
 		func() {
-			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+			ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 			defer cancel()
 			result, err := sqsClient.ReceiveMessageWithContext(ctx, &sqs.ReceiveMessageInput{
 				QueueUrl:              aws.String(queueURL),
