@@ -58,7 +58,7 @@ func getDefault(key string) string {
 		CommandConfigEnvironment:               "default",
 		CommandConfigListenerEngine:            "sqs",
 		CommandConfigListeners:                 "",
-		CommandConfigPublisherOutputTimeout:    "60",
+		CommandConfigPublisherOutputTimeout:    "600",
 		CommandConfigMageRunCommandPath:        "",
 		CommandConfigAllowedMageRunCommands:    "",
 		CommandConfigDeployArchiveFolder:       "/srv/magecomm/deploy/",

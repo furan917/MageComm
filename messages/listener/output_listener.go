@@ -1,10 +1,12 @@
 package listener
 
 import (
+	"bufio"
 	"fmt"
 	"magecomm/config_manager"
 	"magecomm/config_manager/loading"
 	"magecomm/logger"
+	"os"
 	"strconv"
 	"sync"
 	"time"
@@ -15,10 +17,23 @@ func HandleOutputByCorrelationID(correlationID string, queueName string) (string
 
 	var wg sync.WaitGroup
 	stopLoading := make(chan bool)
+	done := make(chan bool)
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
 		loading.Indicator(stopLoading)
+	}()
+
+	// start a separate goroutine to listen for user enter input
+	go func() {
+		reader := bufio.NewReader(os.Stdin)
+		for {
+			text, _ := reader.ReadString('\n')
+			if text == "\n" {
+				close(done)
+				return
+			}
+		}
 	}()
 
 	listenerClass := Listener
@@ -37,7 +52,7 @@ func HandleOutputByCorrelationID(correlationID string, queueName string) (string
 
 	timeout, err := strconv.Atoi(config_manager.GetValue(config_manager.CommandConfigPublisherOutputTimeout))
 	if err != nil {
-		timeout = 60
+		timeout = 600
 	}
 	timeoutDuration := time.Duration(timeout) * time.Second
 
@@ -46,6 +61,8 @@ func HandleOutputByCorrelationID(correlationID string, queueName string) (string
 	case err = <-errCh:
 	case <-time.After(timeoutDuration):
 		err = fmt.Errorf("waiting for command timed out after %v", timeoutDuration)
+	case <-done:
+		fmt.Println("Exited on command")
 	}
 
 	stopLoading <- true

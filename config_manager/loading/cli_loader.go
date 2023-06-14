@@ -15,7 +15,7 @@ func Indicator(stopLoading chan bool) {
 			fmt.Print("\r")
 			return
 		default:
-			fmt.Printf("\rWaiting on response... %s", loadingChars[i])
+			fmt.Printf("\rWaiting on response: Press ENTER to stop... %s", loadingChars[i])
 			i = (i + 1) % len(loadingChars)
 			time.Sleep(100 * time.Millisecond)
 		}
