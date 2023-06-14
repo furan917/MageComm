@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.3](https://github.com/furan917/MageComm/compare/v0.1.2...v0.1.3) (2023-06-14)
+
+
+### Bug Fixes
+
+* Added way to listen to magerun_output queue, added way to exit listening on output return ([879a106](https://github.com/furan917/MageComm/commit/879a106ac22a905349a8e61d40fa621388dc936d))
+
 ## [0.1.2](https://github.com/furan917/MageComm/compare/v0.1.1...v0.1.2) (2023-06-14)
 
 
