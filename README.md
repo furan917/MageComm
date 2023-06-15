@@ -15,7 +15,7 @@ Tested commands: RMQ based magerun command publishing, message listening, cat al
 ## Installation
 
 Install with binary and create configuration file in `/etc/magecomm/`(unix) / `%APPDATA%\magecomm\`(windows) or fallback to environment variables.
-config file can be in yaml or json format e.g `config.yml` or `config.json`
+config file can be in yaml or json format e.g `config.yml` or `config.json`, please ensure you either set your n98 alias to magerun or explicitly set the path in the config file.
 **WARNING: environment variables are not secure and can be easily read/modified by *any* user**
 
 Download the latest release from the [releases page](https://github.com/furan917/magecomm/releases) for your platform and extract to a directory in your PATH.
