@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.4](https://github.com/furan917/MageComm/compare/v0.1.3...v0.1.4) (2023-06-15)
+
+
+### Bug Fixes
+
+* improved  n98 command handler and updated slack output notifier ([5b1d7ec](https://github.com/furan917/MageComm/commit/5b1d7ec767dfb945722acecaeb2fe8371bab8d8d))
+
 ## [0.1.3](https://github.com/furan917/MageComm/compare/v0.1.2...v0.1.3) (2023-06-14)
 
 
