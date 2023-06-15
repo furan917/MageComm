@@ -6,6 +6,7 @@ import (
 
 type SlackConfig struct {
 	Enabled         bool
+	DisableOutput   bool
 	WebhookURL      string
 	WebhookChannel  string
 	WebhookUserName string
@@ -16,6 +17,7 @@ type SlackConfig struct {
 
 var DefaultSlackConfig = SlackConfig{
 	Enabled:         false,
+	DisableOutput:   false,
 	WebhookURL:      "",
 	WebhookChannel:  "",
 	WebhookUserName: "",
@@ -29,6 +31,7 @@ var DefaultSlackNotifier Notifier
 func NewSlackConfig() SlackConfig {
 	return SlackConfig{
 		Enabled:         config_manager.GetBoolValue(config_manager.ConfigSlackEnabled),
+		DisableOutput:   config_manager.GetBoolValue(config_manager.ConfigSlackDisableOutputNotifications),
 		WebhookURL:      config_manager.GetValue(config_manager.ConfigSlackWebhookUrl),
 		WebhookChannel:  config_manager.GetValue(config_manager.ConfigSlackWebhookChannel),
 		WebhookUserName: config_manager.GetValue(config_manager.ConfigSlackWebhookUserName),

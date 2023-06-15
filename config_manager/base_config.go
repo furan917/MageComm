@@ -26,7 +26,9 @@ const (
 	CommandConfigDeployArchiveLatestFile      = "magecomm_deploy_archive_latest_file"
 
 	// Slack
-	ConfigSlackEnabled         = "magecomm_slack_enabled"
+	ConfigSlackEnabled                    = "magecomm_slack_enabled"
+	ConfigSlackDisableOutputNotifications = "magecomm_slack_disable_output_notifications"
+
 	ConfigSlackWebhookUrl      = "magecomm_slack_webhook_url"
 	ConfigSlackWebhookChannel  = "magecomm_slack_webhook_channel"
 	ConfigSlackWebhookUserName = "magecomm_slack_webhook_username"
@@ -64,6 +66,7 @@ func getDefault(key string) string {
 		CommandConfigDeployArchiveFolder:       "/srv/magecomm/deploy/",
 		CommandConfigDeployArchiveLatestFile:   "latest.tar.gz",
 		ConfigSlackEnabled:                     "false",
+		ConfigSlackDisableOutputNotifications:  "false",
 		ConfigSQSRegion:                        "eu-west-1",
 		ConfigRabbitMQTLS:                      "false",
 		ConfigRabbitMQUser:                     "guest",

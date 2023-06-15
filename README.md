@@ -27,6 +27,7 @@ magecomm_log_level: warn
 magecomm_max_operational_cpu_limit: 80
 magecomm_max_operational_memory_limit: 80
 magecomm_environment: dev
+magecomm_magerun_command_path: /usr/local/bin/n98-magerun2 --root-dir=/var/www/html
 magecomm_listener_engine: sqs
 magecomm_sqs_aws_region: eu-west-1
 magecomm_rmq_tls: false
@@ -36,6 +37,7 @@ magecomm_rmq_host: localhost
 magecomm_rmq_port: 5672
 magecomm_rmq_vhost: /
 magecomm_slack_enabled: "true"
+magecomm_slack_disable_output_notifications: "false"
 magecomm_slack_webhook_url: https://hooks.slack.com/services/XXXXX/XXXXX/XXXXX
 magecomm_slack_channel: "magecomm"
 magecomm_slack_username: "magecomm"
@@ -65,6 +67,7 @@ example config.json:
   "magecomm_max_operational_cpu_limit": 80,
   "magecomm_max_operational_memory_limit": 80,
   "magecomm_environment": "dev",
+  "magecomm_magerun_command_path": "/usr/local/bin/n98-magerun2 --root-dir=/var/www/html",
   "magecomm_listener_engine": "sqs",
   "magecomm_sqs_aws_region": "eu-west-1",
   "magecomm_rmq_tls": false,
@@ -73,10 +76,11 @@ example config.json:
   "magecomm_rmq_host": "localhost",
   "magecomm_rmq_port": 5672,
   "magecomm_rmq_vhost": "/",
-  "magecomm_slack_enabled": "true"
-  "magecomm_slack_webhook_url": "https://hooks.slack.com/services/XXXXX/XXXXX/XXXXX"
-  "magecomm_slack_channel": "magecomm"
-  "magecomm_slack_username": "magecomm"
+  "magecomm_slack_enabled": "true",
+  "magecomm_slack_disable_output_notifications": "false",
+  "magecomm_slack_webhook_url": "https://hooks.slack.com/services/XXXXX/XXXXX/XXXXX",
+  "magecomm_slack_channel": "magecomm",
+  "magecomm_slack_username": "magecomm",
   "magecomm_listeners": [
     "magerun",
     "deploy"
@@ -156,6 +160,7 @@ The tool supports slack command run notifications via Webhook or App integration
 - `MAGECOMM_LISTENERS`: Comma-separated list of queues to listen to
 - `MAGECOMM_LISTENER_ENGINE`: Listener engine to use (sqs/rmq), default: sqs
 - `MAGECOMM_PUBLISHER_OUTPUT_TIMEOUT`: Timeout for when listening to publisher message output return, default: 60s
+- `MAGECOMM_MAGERUN_COMMAND_PATH` : Path to magerun command, default: `magerun` (expected alias of n98-magerun2.phar or /usr/local/bin/n98-magerun2 --root-dir=/magento/root/path) 
 - `MAGECOMM_ALLOWED_MAGERUN_COMMANDS ` comma separated list of commands allowed to be run, fallback to in-code list
 - `MAGECOMM_RESTRICTED_MAGERUN_COMMAND_ARGS` JSON object of commands and their restricted args, default: `{}`
 - `MAGECOMM_REQUIRED_MAGERUN_COMMAND_ARGS` JSON object of commands and their required args, default: `{}`
@@ -169,6 +174,7 @@ The tool supports slack command run notifications via Webhook or App integration
 - `MAGECOMM_RMQ_TLS`  Default: `false`
 - `MAGECOMM_RMQ_VHOST` Default: `/`
 - `MAGECOMM_SLACK_ENABLED` Default: `false`, (true|false), if true you must configure the WEBHOOK or APP configurations to work
+- `MAGECOMM_SLACK_DISABLE_OUTPUT_NOTIFICATIONS` Default: 'false, (true|false), if true we will not send output notifications to slack
 - `MAGECOMM_SLACK_WEBHOOK_URL` Default: ``
 - `MAGECOMM_SLACK_WEBHOOK_CHANNEL` Default: ``
 - `MAGECOMM_SLACK_WEBHOOK_USERNAME` Default: ``
