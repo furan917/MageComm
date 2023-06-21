@@ -39,8 +39,8 @@ magecomm_rmq_vhost: /
 magecomm_slack_enabled: "true"
 magecomm_slack_disable_output_notifications: "false"
 magecomm_slack_webhook_url: https://hooks.slack.com/services/XXXXX/XXXXX/XXXXX
-magecomm_slack_channel: "magecomm"
-magecomm_slack_username: "magecomm"
+magecomm_slack_webhook_channel: "magecomm"
+magecomm_slack_webhook_username: "magecomm"
 magecomm_listeners:
   - magerun
   - deploy
@@ -62,8 +62,8 @@ magecomm_required_magerun_command_args:
 example config.json:
 ```
 {
-  "magecomm_log_path": /var/log/magecomm.log
-  "magecomm_log_level": warn
+  "magecomm_log_path": "/var/log/magecomm.log",
+  "magecomm_log_level": "warn",
   "magecomm_max_operational_cpu_limit": 80,
   "magecomm_max_operational_memory_limit": 80,
   "magecomm_environment": "dev",
@@ -79,8 +79,8 @@ example config.json:
   "magecomm_slack_enabled": "true",
   "magecomm_slack_disable_output_notifications": "false",
   "magecomm_slack_webhook_url": "https://hooks.slack.com/services/XXXXX/XXXXX/XXXXX",
-  "magecomm_slack_channel": "magecomm",
-  "magecomm_slack_username": "magecomm",
+  "magecomm_slack_webhook_channel": "magecomm",
+  "magecomm_slack_webhook_username": "magecomm",
   "magecomm_listeners": [
     "magerun",
     "deploy"
@@ -91,13 +91,13 @@ example config.json:
     "setup:static-content:deploy"
     ...etc
   ],
-  magecomm_restricted_magerun_command_args: {
+  "magecomm_restricted_magerun_command_args": {
     "setup:static-content:deploy": [
       "--jobs"
     ]
     ...etc
   },
-  magecomm_required_magerun_command_args: {
+  "magecomm_required_magerun_command_args": {
     "setup:upgrade": [
       "--keep-generated"
     ]

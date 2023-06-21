@@ -48,7 +48,7 @@ func NewSlackNotifier(config SlackConfig) Notifier {
 	return &SlackAppNotifier{Config: config}
 }
 
-func init() {
+func Initialize() {
 	DefaultSlackConfig = NewSlackConfig()
 	DefaultSlackNotifier = NewSlackNotifier(DefaultSlackConfig)
 }

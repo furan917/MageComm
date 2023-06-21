@@ -5,8 +5,11 @@ import (
 	"github.com/google/uuid"
 	"github.com/spf13/cobra"
 	"magecomm/config_manager"
+	"magecomm/logger"
 	"magecomm/messages/listener"
 	"magecomm/messages/publisher"
+	"magecomm/notifictions"
+	"magecomm/services"
 	"strings"
 )
 
@@ -16,21 +19,29 @@ var MagerunCmd = &cobra.Command{
 	Use:                "magerun",
 	Short:              "A wrapper for the magerun command with restricted command usage",
 	DisableFlagParsing: true,
+	PersistentPreRun: func(cmd *cobra.Command, args []string) {
+		//empty pre run to stop execution of parent RootCmd pre run
+	},
 	RunE: func(cmd *cobra.Command, args []string) error {
-		if len(args) < 1 {
+
+		// handle global arguments (e.g. --config, --debug) as root command cannot due to DisableFlagParsing
+		var globalArguments = handleGlobalArguments(args)
+		magerunArgs := args[len(globalArguments):]
+
+		if len(magerunArgs) < 1 {
 			return fmt.Errorf("no command provided")
 		}
 
-		command := args[0]
+		command := magerunArgs[0]
 		if !config_manager.IsMageRunCommandAllowed(command) {
 			return fmt.Errorf("the command '%s' is not allowed", command)
 		}
 
-		if config_manager.IsRestrictedCommandArgsIncluded(command, args[1:]) {
-			return fmt.Errorf("the command '%s' is not allowed with the following arguments: %s", command, strings.Join(args[1:], " "))
+		if config_manager.IsRestrictedCommandArgsIncluded(command, magerunArgs[1:]) {
+			return fmt.Errorf("the command '%s' is not allowed with the following arguments: %s", command, strings.Join(magerunArgs[1:], " "))
 		}
 
-		if isAllRequiredArgsIncluded, missingRequiredArgs := config_manager.IsRequiredCommandArgsIncluded(command, args[1:]); !isAllRequiredArgsIncluded {
+		if isAllRequiredArgsIncluded, missingRequiredArgs := config_manager.IsRequiredCommandArgsIncluded(command, magerunArgs[1:]); !isAllRequiredArgsIncluded {
 			prompt := fmt.Sprintf("The command '%s' is missing required arguments: %s. Do you want to run this command and include them?", command, strings.Join(missingRequiredArgs, " "))
 			confirmed, err := PromptUserForConfirmation(prompt)
 			if err != nil {
@@ -38,13 +49,13 @@ var MagerunCmd = &cobra.Command{
 			}
 
 			if confirmed {
-				args = append(args, missingRequiredArgs...)
+				magerunArgs = append(magerunArgs, missingRequiredArgs...)
 			} else {
 				return fmt.Errorf("exiting: the command '%s' cannot be executed without the required arguments: %s", command, strings.Join(missingRequiredArgs, " "))
 			}
 		}
 
-		err := handleMageRunCmdMessage(args)
+		err := handleMageRunCmdMessage(magerunArgs)
 		if err != nil {
 			return err
 		}
@@ -75,4 +86,36 @@ func handleMageRunCmdMessage(args []string) error {
 	}
 
 	return nil
+}
+
+func initializeModuleWhichRequireConfig() {
+	notifictions.Initialize()
+	services.InitializeRMQ()
+	services.InitializeSQS()
+}
+
+func handleGlobalArguments(args []string) []string {
+	// Replicates RootCmd.PersistentPreRunE as it is not usable when DisableFlagParsing is set to true
+	var globalArguments []string
+	var overrideFilePath string
+	for _, arg := range args {
+		if strings.HasPrefix(arg, "--") {
+			globalArguments = append(globalArguments, arg)
+
+			if strings.HasPrefix(arg, "--config=") {
+				overrideFilePath = strings.TrimPrefix(arg, "--config=")
+			}
+			if strings.HasPrefix(arg, "--debug") {
+				logger.EnableDebugMode()
+			}
+		}
+		if !strings.HasPrefix(arg, "--") {
+			break
+		}
+	}
+
+	config_manager.Configure(overrideFilePath)
+	initializeModuleWhichRequireConfig()
+
+	return globalArguments
 }

@@ -36,7 +36,7 @@ func ReleaseSQSConnection(conn *SQSConnection) {
 	}
 }
 
-func init() {
+func InitializeSQS() {
 	sqsOnce.Do(func() {
 		engine := config_manager.GetValue(config_manager.CommandConfigListenerEngine)
 		if engine == EngineSQS {

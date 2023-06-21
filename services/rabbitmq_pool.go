@@ -90,6 +90,7 @@ func (cp *RabbitMQConnectionPool) Close() {
 }
 
 func (cp *RabbitMQChannelPool) Get() (*amqp.Channel, error) {
+
 	channel := cp.pool.Get()
 	if channel == nil {
 		return nil, ErrChannelPoolClosed
@@ -105,7 +106,7 @@ func (cp *RabbitMQChannelPool) Close() {
 	cp.pool = nil
 }
 
-func init() {
+func InitializeRMQ() {
 	rmqOnce.Do(func() {
 		engine := config_manager.GetValue(config_manager.CommandConfigListenerEngine)
 		if engine == EngineRabbitMQ {
