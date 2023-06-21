@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.5](https://github.com/furan917/MageComm/compare/v0.1.4...v0.1.5) (2023-06-21)
+
+
+### Bug Fixes
+
+* Added configuration overriding and made sweeping fixes to configuration settings ([b56fa10](https://github.com/furan917/MageComm/commit/b56fa10e50c486555c029577ad52d6e2cdd9b43b))
+
 ## [0.1.4](https://github.com/furan917/MageComm/compare/v0.1.3...v0.1.4) (2023-06-15)
 
 
