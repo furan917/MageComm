@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.6](https://github.com/furan917/MageComm/compare/v0.1.5...v0.1.6) (2023-07-20)
+
+
+### Bug Fixes
+
+* Allow limitation of listener queues to avoid abuse or mistakes via user misspelling ([6bb74ba](https://github.com/furan917/MageComm/commit/6bb74ba93d3e8b2f5b36b9b6c856965d660c15e7))
+
 ## [0.1.5](https://github.com/furan917/MageComm/compare/v0.1.4...v0.1.5) (2023-06-21)
 
 
