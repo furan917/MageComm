@@ -204,7 +204,7 @@ If using SQS the Pod/Instance this is deployed on must have an IAM role with the
 `magecomm magerun setup:upgrade --keep-generated`
 
 
-3Extract and print the contents of a file from an archive (RAR, 7zip, and Xz are supported if installed)):  
+3. Extract and print the contents of a file from an archive (RAR, 7zip, and Xz are supported if installed)):  
 `magecomm cat path/to/archive.zip /path/to/file.txt`  
 `magecomm cat path/to/archive.tar /path/to/file.txt`  
 `magecomm cat path/to/archive.tar.gz /path/to/file.txt`  
