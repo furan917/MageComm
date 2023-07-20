@@ -1,6 +1,6 @@
 # MageComm CLI Tool
 
-MageComm CLI is a command line tool for managing Magento applications and deployments. It provides a convenient way to execute restricted magerun commands, manage deployments, and cat specific files within an archive.
+MageComm CLI is a command line tool for managing Magento applications. It provides a convenient way to execute restricted magerun commands, manage deployments, and cat specific files within an archive.
 The main use case for this tool is to provide a way to execute magerun commands in a controlled manner via a messaging service. This allows us to execute commands on a remote server without exposing the application server itself
 
 *It is important to note that the environment configuration/env is important to set if you plan to use this tool in a shared rmq/sqs instance as this will prefix your queues to avoid cross communication*
@@ -43,7 +43,6 @@ magecomm_slack_webhook_channel: "magecomm"
 magecomm_slack_webhook_username: "magecomm"
 magecomm_listeners:
   - magerun
-  - deploy
 magecomm_allowed_magerun_commands:
   - cache:clean
   - cache:flush
@@ -82,8 +81,7 @@ example config.json:
   "magecomm_slack_webhook_channel": "magecomm",
   "magecomm_slack_webhook_username": "magecomm",
   "magecomm_listeners": [
-    "magerun",
-    "deploy"
+    "magerun"
   ],
   "magecomm_allowed_magerun_commands": [
     "cache:clean",
@@ -130,15 +128,6 @@ e.g
 
 - Listen for messages from specified queues then handle them appropriately, fallback to config, then ENV `LISTENERS`
 - Engine (sqs|rmq), default sqs, configured in config or by ENV `MAGECOMM_LISTENER_ENGINE`
-
-#### `magecomm deploy [filepath]`
-
-- (WIP) Deploy an archived file to the specified environment
-
-#### `magecomm cat-deploy [filepath]`
-
-- Extract a file from the latest deployed archive and print its contents to stdout.  
-  *Command must have at minimum the `MAGECOMM_DEPLOY_ARCHIVE_PATH` configured in config file or by ENV to work*
 
 #### `magecomm cat [archive] [filepath]`
 
@@ -200,28 +189,20 @@ If using SQS the Pod/Instance this is deployed on must have an IAM role with the
 
 ## Examples
 
-1. Listen to messages from `magerun` and `deploy`:  
-`magecomm listen magerun deploy`  
+1. Listen to messages from `magerun`:  
+`magecomm listen magerun`  
 
 
 2. Execute a magerun command using SQS as the publisher engine:  
 `magecomm magerun cache:clean`  
-`magecomm magerun setup:upgrade --keep-generated`  
+`magecomm magerun setup:upgrade --keep-generated`
 
 
-3. Deploy a gzipped file (WIP, not yet implemented):  
-`magecomm deploy path/to/archive.gz`    
-
-
-4. Extract and print the contents of a file from an archive (RAR, 7zip, and Xz are supported if installed)):  
+3Extract and print the contents of a file from an archive (RAR, 7zip, and Xz are supported if installed)):  
 `magecomm cat path/to/archive.zip /path/to/file.txt`  
 `magecomm cat path/to/archive.tar /path/to/file.txt`  
 `magecomm cat path/to/archive.tar.gz /path/to/file.txt`  
 `magecomm cat path/to/archive.tar.bz2 /path/to/file.txt`  
 `magecomm cat path/to/archive.tar.xz /path/to/file.txt`  
 `magecomm cat path/to/archive.rar /path/to/file.txt`  
-`magecomm cat path/to/archive.7zip /path/to/file.txt`  
-
-
-5. Extract and print the contents of a file from the latest deploy  
-`magecomm cat-deploy /path/to/target/file.txt`  
+`magecomm cat path/to/archive.7zip /path/to/file.txt`
