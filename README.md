@@ -29,6 +29,8 @@ magecomm_max_operational_memory_limit: 80
 magecomm_environment: dev
 magecomm_magerun_command_path: /usr/local/bin/n98-magerun2 --root-dir=/var/www/html
 magecomm_listener_engine: sqs
+magecomm_listener_allowed_queues:
+  - magerun
 magecomm_sqs_aws_region: eu-west-1
 magecomm_rmq_tls: false
 magecomm_rmq_user: guest
@@ -68,6 +70,9 @@ example config.json:
   "magecomm_environment": "dev",
   "magecomm_magerun_command_path": "/usr/local/bin/n98-magerun2 --root-dir=/var/www/html",
   "magecomm_listener_engine": "sqs",
+  "magecomm_listener_allowed_queues": [
+    "magerun"
+  ],
   "magecomm_sqs_aws_region": "eu-west-1",
   "magecomm_rmq_tls": false,
   "magecomm_rmq_user": "guest",
@@ -148,6 +153,7 @@ The tool supports slack command run notifications via Webhook or App integration
 - `MAGECOMM_ENVIRONMENT`: the environment scope the tool is to work in, Default `default`
 - `MAGECOMM_LISTENERS`: Comma-separated list of queues to listen to
 - `MAGECOMM_LISTENER_ENGINE`: Listener engine to use (sqs/rmq), default: sqs
+- `MAGECOMM_LISTENER_ALLOWED_QUEUES`: Comma-separated list of queues to allow to listen to, default: `cat, magerun`
 - `MAGECOMM_PUBLISHER_OUTPUT_TIMEOUT`: Timeout for when listening to publisher message output return, default: 60s
 - `MAGECOMM_MAGERUN_COMMAND_PATH` : Path to magerun command, default: `magerun` (expected alias of n98-magerun2.phar or /usr/local/bin/n98-magerun2 --root-dir=/magento/root/path) 
 - `MAGECOMM_ALLOWED_MAGERUN_COMMANDS ` comma separated list of commands allowed to be run, fallback to in-code list

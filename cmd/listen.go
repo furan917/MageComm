@@ -25,6 +25,14 @@ var ListenCmd = &cobra.Command{
 			queueNames = strings.Split(queuesFromEnv, ",")
 		}
 
+		//if queueNames not in allowed queues, return error
+		for _, queueName := range queueNames {
+			if !config_manager.IsAllowedQueue(queueName) {
+				logger.Fatalf("Queue %s is not allowed, allowed queues: %s", queueName, config_manager.GetAllowedQueues())
+				return
+			}
+		}
+
 		listener, err := listener.MapListenerToEngine()
 		if err != nil {
 			logger.Fatal(err)
