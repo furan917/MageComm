@@ -9,7 +9,9 @@ The tool looks for a configuration file in `/etc/magecomm/`(unix) / `%APPDATA%\m
 
 ## Beta
 Currently this tool is in beta, and is not recommended for production use.
-Tested commands: RMQ based magerun command publishing, message listening, cat all supported archive types
+
+## Akoova Customizations
+-- Note here when any are created --
 
 
 ## Installation
