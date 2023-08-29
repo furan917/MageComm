@@ -1,5 +1,29 @@
 # Changelog
 
+## [0.2.0](https://github.com/akoova/MageComm/compare/v0.1.6...v0.2.0) (2023-08-29)
+
+
+### Features
+
+* Fixed SQS and added slack notification ability ([3e4a869](https://github.com/akoova/MageComm/commit/3e4a869aaf5828f024707e39ec10d2c187c69836))
+
+
+### Bug Fixes
+
+* Added configuration overriding and made sweeping fixes to configuration settings ([b56fa10](https://github.com/akoova/MageComm/commit/b56fa10e50c486555c029577ad52d6e2cdd9b43b))
+* Added way to listen to magerun_output queue, added way to exit listening on output return ([879a106](https://github.com/akoova/MageComm/commit/879a106ac22a905349a8e61d40fa621388dc936d))
+* Allow limitation of listener queues to avoid abuse or mistakes via user misspelling ([6bb74ba](https://github.com/akoova/MageComm/commit/6bb74ba93d3e8b2f5b36b9b6c856965d660c15e7))
+* Allow ReleasePlease to create build assets for releases ([d7f44ba](https://github.com/akoova/MageComm/commit/d7f44bac257e32dbd280750261119c277e961ff8))
+* Correct release.yml behaviour and allow manual running of QOL actions ([644dfaa](https://github.com/akoova/MageComm/commit/644dfaa666385c967709cd61c8ba75ae5d2bfe13))
+* Correct tests to work with new functionality ([5b82107](https://github.com/akoova/MageComm/commit/5b82107be816ccf9534d20b11b90cbf8f2b012ad))
+* improved  n98 command handler and updated slack output notifier ([5b1d7ec](https://github.com/akoova/MageComm/commit/5b1d7ec767dfb945722acecaeb2fe8371bab8d8d))
+* Include Restricted & Required argument configuration ([ebd175b](https://github.com/akoova/MageComm/commit/ebd175b51bb53367aabb0712409d0ea7bb9ed110))
+* readme showed deploy command existed ([65cc4a7](https://github.com/akoova/MageComm/commit/65cc4a7e0fd68a143feba505bd49babc2281ba7a))
+* ref_name for autodeployments ([40bbfd2](https://github.com/akoova/MageComm/commit/40bbfd22e0faa01e5384140107b3ce61cf8da6e7))
+* SQS queues did not work correctly with CorrelationIDs ([cdf48cb](https://github.com/akoova/MageComm/commit/cdf48cbe93157ad97da9e0cce8377005a80fc591))
+* SQS was set to short polling, updated to wait 60s ([eb4be08](https://github.com/akoova/MageComm/commit/eb4be08a63cb3cfd0eb13db6a224281b5ae2e3af))
+* Updating CTX wait timeout of SQS ([99398e8](https://github.com/akoova/MageComm/commit/99398e805f16a8346b4c4bd4c5f36e03998131e5))
+
 ## [0.1.6](https://github.com/furan917/MageComm/compare/v0.1.5...v0.1.6) (2023-07-20)
 
 
