@@ -14,9 +14,29 @@ env:
   GO_VERSION: '1.20'
 
 jobs:
-  lint:
+  build:
     runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
 
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - name: Set GOPATH
+        run: echo "GOPATH=$(go env GOPATH)" >> $GITHUB_ENV
+
+      - name: Download dependencies
+        run: go mod download
+
+      - name: Build
+        run: go build
+
+  lint:
+    needs: build
+    runs-on: ubuntu-latest
     steps:
       - name: Check out code
         uses: actions/checkout@v3
@@ -39,9 +59,8 @@ jobs:
         run: golangci-lint run ./...
 
   tidy:
-    needs: lint
+    needs: build
     runs-on: ubuntu-latest
-
     steps:
       - name: Check out code
         uses: actions/checkout@v3
@@ -59,24 +78,3 @@ jobs:
 
       - name: Check go.mod and go.sum
         run: go mod tidy && git diff --exit-code
-
-  build:
-    needs: lint
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v3
-
-      - name: Set up Go
-        uses: actions/setup-go@v4
-        with:
-          go-version: ${{ env.GO_VERSION }}
-
-      - name: Set GOPATH
-        run: echo "GOPATH=$(go env GOPATH)" >> $GITHUB_ENV
-
-      - name: Download dependencies
-        run: go mod download
-
-      - name: Build
-        run: go build
