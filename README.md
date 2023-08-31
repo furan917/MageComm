@@ -7,6 +7,15 @@ The main use case for this tool is to provide a way to execute magerun commands 
 
 The tool looks for a configuration file in `/etc/magecomm/`(unix) / `%APPDATA%\magecomm\`(windows) `config.yml|config.json` and if none found defaults to environment variables, then fallback to default values.
 
+
+## Akoova Specific fork details
+**Currently there is no custom code changes for akoova, this is a fork of the original repo to allow us to make changes if needed in the future**
+
+- Release-Please is disabled for this repository.
+
+## Release Tagging
+As this is an akoova specific fork, we will be using akoova specific tag nomenclature with a semver postfix, e.g. `v1.0.0-akoova`
+
 ## Beta
 Currently this tool is in beta, and is not recommended for production use.
 Tested commands: RMQ based magerun command publishing, message listening, cat all supported archive types
