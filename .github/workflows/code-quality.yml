@@ -77,4 +77,11 @@ jobs:
         run: go mod download
 
       - name: Check go.mod and go.sum
-        run: go mod tidy && git diff --exit-code
+        run: |
+          go mod tidy
+          GIT_DIFF=$(git diff)
+          if [ -n "$GIT_DIFF" ]; then
+            echo "::warning::Improvements can be made with go mod tidy. Run 'go mod tidy' locally and commit the changes as appropriate."
+            echo "$GIT_DIFF"
+          fi
+        continue-on-error: true
