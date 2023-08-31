@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.7](https://github.com/furan917/MageComm/compare/v0.1.6...v0.1.7) (2023-08-31)
+
+
+### Bug Fixes
+
+* CGO ENV setting ([7e0b462](https://github.com/furan917/MageComm/commit/7e0b462062386bdbc1c9027af190fcc45b0bbd6c))
+
 ## [0.1.6](https://github.com/furan917/MageComm/compare/v0.1.5...v0.1.6) (2023-07-20)
 
 
