@@ -13,6 +13,12 @@ The tool looks for a configuration file in `/etc/magecomm/`(unix) / `%APPDATA%\m
 
 - Release-Please is disabled for this repository.
 
+Quick install for M1/M2 mac:
+`wget https://github.com/akoova/MageComm/releases/download/v0.1.7-akoova/magecomm-darwin-arm64 && sudo mv magecomm-darwin-arm64 /usr/local/bin/magecomm && sudo chmod +x /usr/local/bin/magecomm`
+
+If you wish to run a command for a clients environment use the following command: 
+`MAGECOMM_ENVIRONMENT=ce23 aws-vault exec sudo-elasteradev -- magecomm magerun cache:clean`
+
 ## Release Tagging
 As this is an akoova specific fork, we will be using akoova specific tag nomenclature with a semver postfix, e.g. `v1.0.0-akoova`
 
