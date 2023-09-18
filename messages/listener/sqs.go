@@ -37,7 +37,12 @@ func (listener *SqsListener) shouldExecutionBeDelayed() error {
 
 func (listener *SqsListener) processSqsMessage(message *sqs.Message, sqsClient *sqs.SQS, queueName string, queueURL string) {
 	messageAttributes := message.MessageAttributes
-	correlationID := *messageAttributes["CorrelationID"].StringValue
+	correlationID := "NoCorrelationIdGiven" // Default value for correlationID
+	if messageAttributes["CorrelationID"] != nil {
+		correlationID = *messageAttributes["CorrelationID"].StringValue
+	} else {
+		logger.Warn("No CorrelationID attribute found in message")
+	}
 	receiveCount, err := strconv.Atoi(*message.Attributes["ApproximateReceiveCount"])
 	if err != nil {
 		logger.Warnf("Error parsing ApproximateReceiveCount attribute: %v", err)

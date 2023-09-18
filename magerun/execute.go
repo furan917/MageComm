@@ -14,6 +14,8 @@ const DefaultCommandMageRun = "magerun"
 
 func HandleMagerunCommand(messageBody string) (string, error) {
 	command, args := parseMagerunCommand(messageBody)
+	args = sanitizeCommandArgs(args)
+
 	if !config_manager.IsMageRunCommandAllowed(command) {
 		return "", fmt.Errorf("command %s is not allowed", command)
 	}
@@ -77,4 +79,28 @@ func getMageRunCommand() string {
 func parseMagerunCommand(messageBody string) (string, []string) {
 	args := strings.Fields(messageBody)
 	return args[0], args[1:]
+}
+
+// We absolutely must not allow command escaping. e.g magerun cache:clean; rm -rf /
+func sanitizeCommandArgs(args []string) []string {
+	var sanitizedArgs []string
+	disallowed := []string{";", "&&", "||", "|", "`", "$", "(", ")", "<", ">", "!"}
+	for _, arg := range args {
+		if contains(disallowed, arg) {
+			logger.Warnf("Command args contain potentially unsafe characters, removing arg: %s", arg)
+			continue
+		}
+		sanitizedArgs = append(sanitizedArgs, arg)
+	}
+	return sanitizedArgs
+}
+
+// Helper function to check if a slice contains a string
+func contains(slice []string, item string) bool {
+	for _, substring := range slice {
+		if strings.Contains(item, substring) {
+			return true
+		}
+	}
+	return false
 }

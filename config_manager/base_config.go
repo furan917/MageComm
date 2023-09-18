@@ -86,20 +86,23 @@ func getDefault(key string) string {
 }
 
 func Configure(overrideFile string) {
-
 	if overrideFile != "" {
 		viper.SetConfigFile(overrideFile)
 	} else {
+		// Set base folder and file name of config file
 		viper.SetConfigName("config")
 		if runtime.GOOS == "windows" {
 			viper.AddConfigPath(os.Getenv("APPDATA") + "\\magecomm\\")
 		} else {
 			viper.AddConfigPath("/etc/magecomm/")
 		}
+		// Search for json config file first, then fallback to yaml
+		viper.SetConfigType("json")
+		if err := viper.ReadInConfig(); err != nil {
+			viper.SetConfigType("yaml")
+		}
 	}
 
-	configName := viper.ConfigFileUsed()
-	logger.Infof("Using config file: %s", configName)
 	err := viper.ReadInConfig()
 	if err != nil {
 		// If the configuration file does not exist, warn user that env vars will be used
@@ -113,11 +116,16 @@ func Configure(overrideFile string) {
 
 	if logPath := GetValue(ConfigLogPath); logPath != "" {
 		logger.ConfigureLogPath(logPath)
+		logger.Infof("Logging to file: %s", logPath)
 	}
 
 	if logLevel := GetValue(ConfigLogLevel); logLevel != "" {
 		logger.SetLogLevel(logLevel)
+		logger.Infof("Logging level set to: %s", logLevel)
 	}
+
+	configName := viper.ConfigFileUsed()
+	logger.Infof("Using config file: %s", configName)
 }
 
 func GetBoolValue(key string) bool {
