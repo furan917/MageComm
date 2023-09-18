@@ -3,6 +3,7 @@ package magerun
 import (
 	"bytes"
 	"fmt"
+	"magecomm/common"
 	"magecomm/config_manager"
 	"magecomm/logger"
 	"magecomm/notifictions"
@@ -86,21 +87,11 @@ func sanitizeCommandArgs(args []string) []string {
 	var sanitizedArgs []string
 	disallowed := []string{";", "&&", "||", "|", "`", "$", "(", ")", "<", ">", "!"}
 	for _, arg := range args {
-		if contains(disallowed, arg) {
+		if common.Contains(disallowed, arg) {
 			logger.Warnf("Command args contain potentially unsafe characters, removing arg: %s", arg)
 			continue
 		}
 		sanitizedArgs = append(sanitizedArgs, arg)
 	}
 	return sanitizedArgs
-}
-
-// Helper function to check if a slice contains a string
-func contains(slice []string, item string) bool {
-	for _, substring := range slice {
-		if strings.Contains(item, substring) {
-			return true
-		}
-	}
-	return false
 }
