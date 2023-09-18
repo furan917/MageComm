@@ -102,8 +102,10 @@ func handleGlobalArguments(args []string) []string {
 		if strings.HasPrefix(arg, "--") {
 			globalArguments = append(globalArguments, arg)
 
-			if strings.HasPrefix(arg, "--config=") {
+			if strings.HasPrefix(arg, "--config") {
+				// Catch both --config /file/path and --config=/file/path
 				overrideFilePath = strings.TrimPrefix(arg, "--config=")
+				overrideFilePath = strings.TrimPrefix(arg, "--config ")
 			}
 			if strings.HasPrefix(arg, "--debug") {
 				logger.EnableDebugMode()

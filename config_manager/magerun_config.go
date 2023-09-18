@@ -1,7 +1,6 @@
 package config_manager
 
 import (
-	"fmt"
 	"magecomm/logger"
 	"strings"
 )
@@ -52,9 +51,9 @@ var defaultAllowedCommands = []string{
 func IsMageRunCommandAllowed(command string) bool {
 	var allowedCommands []string
 
-	allowedCommandsEnv := GetValue(CommandConfigAllowedMageRunCommands)
-	if allowedCommandsEnv != "" {
-		allowedCommands = strings.Split(allowedCommandsEnv, ",")
+	allowedCommandsConfig := GetValue(CommandConfigAllowedMageRunCommands)
+	if allowedCommandsConfig != "" {
+		allowedCommands = strings.Split(allowedCommandsConfig, ",")
 	} else {
 		allowedCommands = defaultAllowedCommands
 	}
@@ -65,8 +64,7 @@ func IsMageRunCommandAllowed(command string) bool {
 		}
 	}
 	// print allowed commands
-	logger.Warnf("Command not allowed, allowed commands are:\n%s \n", strings.Join(allowedCommands, ",\n"))
-	fmt.Printf("%s Command not allowed, allowed commands are:\n%s \n", command, strings.Join(allowedCommands, ",\n"))
+	logger.Fatalf("`%s` Command not allowed, allowed commands are:\n%s \n", command, strings.Join(allowedCommands, ",\n"))
 	return false
 }
 

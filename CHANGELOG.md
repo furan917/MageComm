@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.1.8](https://github.com/furan917/MageComm/compare/v0.1.7...v0.1.8) (2023-09-18)
+
+
+### Bug Fixes
+
+* Command Escaping added + Correct config file pickup ([5fbd2fe](https://github.com/furan917/MageComm/commit/5fbd2feeb96ccb8076567311689e163bd3e73235))
+* Map and Slices can now be read from config file ([839b3c6](https://github.com/furan917/MageComm/commit/839b3c6c40171a0a22008b84f65216871220889c))
+
 ## [0.1.7](https://github.com/furan917/MageComm/compare/v0.1.6...v0.1.7) (2023-08-31)
 
 

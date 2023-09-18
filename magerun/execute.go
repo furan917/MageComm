@@ -3,6 +3,7 @@ package magerun
 import (
 	"bytes"
 	"fmt"
+	"magecomm/common"
 	"magecomm/config_manager"
 	"magecomm/logger"
 	"magecomm/notifictions"
@@ -14,6 +15,8 @@ const DefaultCommandMageRun = "magerun"
 
 func HandleMagerunCommand(messageBody string) (string, error) {
 	command, args := parseMagerunCommand(messageBody)
+	args = sanitizeCommandArgs(args)
+
 	if !config_manager.IsMageRunCommandAllowed(command) {
 		return "", fmt.Errorf("command %s is not allowed", command)
 	}
@@ -77,4 +80,18 @@ func getMageRunCommand() string {
 func parseMagerunCommand(messageBody string) (string, []string) {
 	args := strings.Fields(messageBody)
 	return args[0], args[1:]
+}
+
+// We absolutely must not allow command escaping. e.g magerun cache:clean; rm -rf /
+func sanitizeCommandArgs(args []string) []string {
+	var sanitizedArgs []string
+	disallowed := []string{";", "&&", "||", "|", "`", "$", "(", ")", "<", ">", "!"}
+	for _, arg := range args {
+		if common.Contains(disallowed, arg) {
+			logger.Warnf("Command args contain potentially unsafe characters, removing arg: %s", arg)
+			continue
+		}
+		sanitizedArgs = append(sanitizedArgs, arg)
+	}
+	return sanitizedArgs
 }
