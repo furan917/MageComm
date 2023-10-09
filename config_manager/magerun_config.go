@@ -64,7 +64,7 @@ func IsMageRunCommandAllowed(command string) bool {
 		}
 	}
 	// print allowed commands
-	logger.Fatalf("`%s` Command not allowed, allowed commands are:\n%s \n", command, strings.Join(allowedCommands, ",\n"))
+	logger.Errorf("`%s` Command not allowed, allowed commands are:\n%s \n", command, strings.Join(allowedCommands, ",\n"))
 	return false
 }
 

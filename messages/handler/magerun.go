@@ -23,6 +23,12 @@ func (handler *MagerunHandler) ProcessMessage(messageBody string, correlationID 
 	if err != nil {
 		output = output + err.Error()
 	}
+	output = strings.TrimSpace(output)
+
+	//if output is empty return "command finished with no out
+	if output == "" {
+		output = "Command finished with no output"
+	}
 
 	if config_manager.GetBoolValue(config_manager.ConfigSlackEnabled) && !config_manager.GetBoolValue(config_manager.ConfigSlackDisableOutputNotifications) {
 		logger.Infof("Slack notification is enabled, sending output notification")

@@ -8,6 +8,7 @@ import (
 	"magecomm/logger"
 	"magecomm/notifictions"
 	"os/exec"
+	"regexp"
 	"strings"
 )
 
@@ -63,9 +64,24 @@ func executeMagerunCommand(args []string) (string, error) {
 	stdoutStr := stdoutBuffer.String()
 	stderrStr := stderrBuffer.String()
 
-	output := stdoutStr + "\n" + stderrStr
+	output := stripMagerunOutput(stdoutStr + "\n" + stderrStr)
 
 	return output, nil
+}
+
+func stripMagerunOutput(output string) string {
+	patterns := map[string]string{
+		`(?i)(?:it's|it is) not recommended to run .*? as root user`: "",
+		//Add more regex patterns here with their corresponding replacement
+	}
+
+	strippedOutput := output
+	for pattern, replacement := range patterns {
+		re := regexp.MustCompile(pattern)
+		strippedOutput = re.ReplaceAllString(strippedOutput, replacement)
+	}
+
+	return strippedOutput
 }
 
 func getMageRunCommand() string {
