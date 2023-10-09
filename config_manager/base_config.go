@@ -13,6 +13,7 @@ import (
 const (
 	ConfigLogPath                             = "magecomm_log_path"
 	ConfigLogLevel                            = "magecomm_log_level"
+	ConfigPrintoutLogLevel                    = "magecomm_printout_log_level"
 	CommandConfigMaxOperationalCpuLimit       = "magecomm_max_operational_cpu_limit"
 	CommandConfigMaxOperationalMemoryLimit    = "magecomm_max_operational_memory_limit"
 	CommandConfigEnvironment                  = "magecomm_environment"
@@ -70,6 +71,7 @@ func getDefault(key string) string {
 	defaults := map[string]string{
 		ConfigLogPath:                          "",
 		ConfigLogLevel:                         "warn",
+		ConfigPrintoutLogLevel:                 "error",
 		CommandConfigMaxOperationalCpuLimit:    "80",
 		CommandConfigMaxOperationalMemoryLimit: "80",
 		CommandConfigEnvironment:               "default",
@@ -136,6 +138,11 @@ func Configure(overrideFile string) {
 	if logLevel := GetValue(ConfigLogLevel); logLevel != "" {
 		logger.SetLogLevel(logLevel)
 		logger.Infof("Logging level set to: %s", logLevel)
+	}
+
+	if PrintoutLogLevel := GetValue(ConfigPrintoutLogLevel); PrintoutLogLevel != "" {
+		logger.SetPrintoutLevel(PrintoutLogLevel)
+		logger.Infof("Logging printout to cli level set to: %s and above", PrintoutLogLevel)
 	}
 
 	configName := viper.ConfigFileUsed()
