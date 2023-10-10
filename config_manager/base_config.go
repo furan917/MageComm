@@ -140,11 +140,6 @@ func Configure(overrideFile string) {
 		logger.Infof("Logging level set to: %s", logLevel)
 	}
 
-	if PrintoutLogLevel := GetValue(ConfigPrintoutLogLevel); PrintoutLogLevel != "" {
-		logger.SetPrintoutLevel(PrintoutLogLevel)
-		logger.Infof("Logging printout to cli level set to: %s and above", PrintoutLogLevel)
-	}
-
 	configName := viper.ConfigFileUsed()
 	logger.Infof("Using config file: %s", configName)
 }

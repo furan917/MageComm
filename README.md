@@ -24,7 +24,6 @@ example config.yml:
 ```
 magecomm_log_path: /var/log/magecomm.log
 magecomm_log_level: warn
-magecomm_printout_log_level: error
 magecomm_max_operational_cpu_limit: 80
 magecomm_max_operational_memory_limit: 80
 magecomm_environment: dev
@@ -66,7 +65,6 @@ example config.json:
 {
   "magecomm_log_path": "/var/log/magecomm.log",
   "magecomm_log_level": "warn",
-  "magecomm_printout_log_level": "error",
   "magecomm_max_operational_cpu_limit": 80,
   "magecomm_max_operational_memory_limit": 80,
   "magecomm_environment": "dev",
@@ -150,7 +148,6 @@ The tool supports slack command run notifications via Webhook or App integration
 
 - `MAGECOMM_LOG_PATH`: Path to log file, default: SYSLOG
 - `MAGECOMM_LOG_LEVEL`: Log level, default: WARN, options (TRACE, DEBUG, INFO, WARN, ERROR, FATAL, PANIC)
-- `MAGECOMM_PRINTOUT_LOG_LEVEL`: Log level and above which logs are also echoed to CLI, default: ERROR, options (TRACE, DEBUG, INFO, WARN, ERROR, FATAL, PANIC)
 - `MAGECOMM_MAX_OPERATIONAL_CPU_LIMIT`: Maximum CPU limit of system before we defer processing messages, default: 80
 - `MAGECOMM_MAX_OPERATIONAL_MEMORY_LIMIT`: Maximum memory limit of system before we defer processing messages, default: 80
 - `MAGECOMM_ENVIRONMENT`: the environment scope the tool is to work in, Default `default`

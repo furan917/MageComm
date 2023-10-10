@@ -44,6 +44,5 @@ func main() {
 	err := RootCmd.Execute()
 	if err != nil {
 		logger.Fatalf("Failed to execute command: %s", err)
-		return
 	}
 }

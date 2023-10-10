@@ -18,12 +18,12 @@ func HandleMagerunCommand(messageBody string) (string, error) {
 	command, args := parseMagerunCommand(messageBody)
 	args = sanitizeCommandArgs(args)
 
-	if !config_manager.IsMageRunCommandAllowed(command) {
-		return "", fmt.Errorf("command %s is not allowed", command)
+	if isCmdAllowed, err := config_manager.IsMageRunCommandAllowed(command); !isCmdAllowed {
+		return "", err
 	}
 
-	if config_manager.IsRestrictedCommandArgsIncluded(command, args) {
-		return "", fmt.Errorf("the command '%s' is not allowed with the following arguments: %s", command, strings.Join(args, " "))
+	if isRestrictedArgsIncluded, err := config_manager.IsRestrictedCommandArgsIncluded(command, args); isRestrictedArgsIncluded {
+		return "", err
 	}
 
 	if isAllRequiredArgsIncluded, missingRequiredArgs := config_manager.IsRequiredCommandArgsIncluded(command, args); !isAllRequiredArgsIncluded {
@@ -44,7 +44,7 @@ func executeMagerunCommand(args []string) (string, error) {
 		err := notifier.Notify(
 			fmt.Sprintf("Executing command: '%v' on environment: '%s'", strings.Join(args, " "), config_manager.GetValue(config_manager.CommandConfigEnvironment)))
 		if err != nil {
-			logger.Warnf("Failed to send slack notification: %v\n", err)
+			logger.Warnf("Failed to send slack notification: %v", err)
 		}
 	}
 
@@ -65,6 +65,8 @@ func executeMagerunCommand(args []string) (string, error) {
 	stderrStr := stderrBuffer.String()
 
 	output := stripMagerunOutput(stdoutStr + "\n" + stderrStr)
+
+	logger.Infof("Executed command %s with args: %v and handling output", mageRunCmdPath, args)
 
 	return output, nil
 }
