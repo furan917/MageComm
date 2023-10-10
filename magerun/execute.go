@@ -30,6 +30,12 @@ func HandleMagerunCommand(messageBody string) (string, error) {
 		return "", fmt.Errorf("the command '%s' is missing some required arguments: %s, unable to run command", command, strings.Join(missingRequiredArgs, " "))
 	}
 
+	//if --no-interaction is not set, set it
+	if !common.Contains(args, "--no-interaction") {
+		args = append(args, "--no-interaction")
+		logger.Infof("The command '%s' does not contain the '--no-interaction' flag, adding it to the command", command)
+	}
+
 	args = append([]string{command}, args...)
 	return executeMagerunCommand(args)
 }
