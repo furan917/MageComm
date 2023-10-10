@@ -45,6 +45,7 @@ magecomm_slack_webhook_channel: "magecomm"
 magecomm_slack_webhook_username: "magecomm"
 magecomm_listeners:
   - magerun
+magecomm_force_magerun_no_interaction: "true"
 magecomm_allowed_magerun_commands:
   - cache:clean
   - cache:flush
@@ -88,6 +89,7 @@ example config.json:
   "magecomm_listeners": [
     "magerun"
   ],
+  "magecomm_force_magerun_no_interaction": "true",
   "magecomm_allowed_magerun_commands": [
     "cache:clean",
     "cache:flush",
@@ -156,6 +158,7 @@ The tool supports slack command run notifications via Webhook or App integration
 - `MAGECOMM_LISTENER_ALLOWED_QUEUES`: Comma-separated list of queues to allow to listen to, default: `cat, magerun`
 - `MAGECOMM_PUBLISHER_OUTPUT_TIMEOUT`: Timeout for when listening to publisher message output return, default: 60s
 - `MAGECOMM_MAGERUN_COMMAND_PATH` : Path to magerun command, default: `magerun` (expected alias of n98-magerun2.phar or /usr/local/bin/n98-magerun2 --root-dir=/magento/root/path) 
+- `MAGECOMM_FORCE_MAGERUN_NO_INTERACTION` : Force magerun to run in no interaction mode, default: `true`
 - `MAGECOMM_ALLOWED_MAGERUN_COMMANDS ` comma separated list of commands allowed to be run, fallback to in-code list
 - `MAGECOMM_RESTRICTED_MAGERUN_COMMAND_ARGS` JSON object of commands and their restricted args, default: `{}`
 - `MAGECOMM_REQUIRED_MAGERUN_COMMAND_ARGS` JSON object of commands and their required args, default: `{}`

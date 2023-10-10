@@ -25,6 +25,7 @@ const (
 	CommandConfigAllowedMageRunCommands       = "magecomm_allowed_magerun_commands"
 	CommandConfigRestrictedMagerunCommandArgs = "magecomm_restricted_magerun_command_args"
 	CommandConfigRequiredMagerunCommandArgs   = "magecomm_required_magerun_command_args"
+	CommandConfigForceMagerunNoInteraction    = "magecomm_force_magerun_no_interaction"
 	CommandConfigDeployArchiveFolder          = "magecomm_deploy_archive_path"
 	CommandConfigDeployArchiveLatestFile      = "magecomm_deploy_archive_latest_file"
 
@@ -81,6 +82,7 @@ func getDefault(key string) string {
 		CommandConfigPublisherOutputTimeout:    "600",
 		CommandConfigMageRunCommandPath:        "",
 		CommandConfigAllowedMageRunCommands:    "",
+		CommandConfigForceMagerunNoInteraction: "true",
 		CommandConfigDeployArchiveFolder:       "/srv/magecomm/deploy/",
 		CommandConfigDeployArchiveLatestFile:   "latest.tar.gz",
 		ConfigSlackEnabled:                     "false",

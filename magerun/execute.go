@@ -30,10 +30,18 @@ func HandleMagerunCommand(messageBody string) (string, error) {
 		return "", fmt.Errorf("the command '%s' is missing some required arguments: %s, unable to run command", command, strings.Join(missingRequiredArgs, " "))
 	}
 
-	//if --no-interaction is not set, set it
-	if !common.Contains(args, "--no-interaction") {
-		args = append(args, "--no-interaction")
+	//if --no-interaction/-n is not set, set it
+	forceNoInteractionFlag := config_manager.GetBoolValue(config_manager.CommandConfigForceMagerunNoInteraction)
+	noInteractionFlagPresent := false
+	for _, arg := range args {
+		if arg == "--no-interaction" || arg == "-n" {
+			noInteractionFlagPresent = true
+			break
+		}
+	}
+	if !noInteractionFlagPresent && forceNoInteractionFlag {
 		logger.Infof("The command '%s' does not contain the '--no-interaction' flag, adding it to the command", command)
+		args = append(args, "--no-interaction")
 	}
 
 	args = append([]string{command}, args...)
