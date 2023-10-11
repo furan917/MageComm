@@ -50,7 +50,7 @@ func HandleMagerunCommand(messageBody string) (string, error) {
 
 func executeMagerunCommand(args []string) (string, error) {
 	mageRunCmdPath := getMageRunCommand()
-	logger.Infof("Executing command %s with args: %v\n", mageRunCmdPath, args)
+	logger.Infof("Executing command %s with args: %v", mageRunCmdPath, args)
 
 	if config_manager.GetBoolValue(config_manager.ConfigSlackEnabled) {
 		logger.Infof("Slack notification is enabled, sending notification")
@@ -71,16 +71,16 @@ func executeMagerunCommand(args []string) (string, error) {
 	cmd.Stderr = &stderrBuffer
 
 	err := cmd.Run()
-	if err != nil {
-		return "", fmt.Errorf("error executing magerun command: %s", err)
-	}
-
+	// Grab any output before returning with command error
 	stdoutStr := stdoutBuffer.String()
 	stderrStr := stderrBuffer.String()
-
 	output := stripMagerunOutput(stdoutStr + "\n" + stderrStr)
 
-	logger.Infof("Executed command %s with args: %v and handling output", mageRunCmdPath, args)
+	// Now check command for error and return either success or failure
+	if err != nil {
+		logger.Warnf("Error executing magerun command: %s, with the following output: %s", err, strings.ReplaceAll(output, "\n", " "))
+		return output, fmt.Errorf("error executing magerun command: %s", err)
+	}
 	return output, nil
 }
 
@@ -95,6 +95,8 @@ func stripMagerunOutput(output string) string {
 		re := regexp.MustCompile(pattern)
 		strippedOutput = re.ReplaceAllString(strippedOutput, replacement)
 	}
+	//trim any leading or trailing whitespace
+	strippedOutput = strings.TrimSpace(strippedOutput)
 
 	return strippedOutput
 }
