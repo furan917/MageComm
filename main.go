@@ -34,9 +34,9 @@ func initializeModuleWhichRequireConfig() {
 func main() {
 	RootCmd.AddCommand(cmd.ListenCmd)
 	RootCmd.AddCommand(cmd.MagerunCmd)
-	RootCmd.AddCommand(cmd.DeployCmd)
+	//RootCmd.AddCommand(cmd.DeployCmd)
 	RootCmd.AddCommand(cmd.CatCmd)
-	RootCmd.AddCommand(cmd.CatDeployCmd)
+	//RootCmd.AddCommand(cmd.CatDeployCmd)
 
 	RootCmd.PersistentFlags().String("config", "", "Path to config file")
 	RootCmd.PersistentFlags().Bool("debug", false, "Enable debug mode")
