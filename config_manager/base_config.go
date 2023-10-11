@@ -2,6 +2,7 @@ package config_manager
 
 import (
 	"encoding/json"
+	"errors"
 	"github.com/spf13/viper"
 	"magecomm/common"
 	"magecomm/logger"
@@ -124,7 +125,8 @@ func Configure(overrideFile string) {
 	err := viper.ReadInConfig()
 	if err != nil {
 		// If the configuration file does not exist, warn user that env vars will be used
-		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
+		var configFileNotFoundError viper.ConfigFileNotFoundError
+		if errors.As(err, &configFileNotFoundError) {
 			logger.Infof("No config file found, reading fully from env vars, this is less secure")
 		} else {
 			logger.Warnf("Failed to read the config file, reading from ENV vars, this is less secure: %v", err)

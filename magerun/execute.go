@@ -81,7 +81,6 @@ func executeMagerunCommand(args []string) (string, error) {
 	output := stripMagerunOutput(stdoutStr + "\n" + stderrStr)
 
 	logger.Infof("Executed command %s with args: %v and handling output", mageRunCmdPath, args)
-
 	return output, nil
 }
 
@@ -114,7 +113,7 @@ func parseMagerunCommand(messageBody string) (string, []string) {
 	return args[0], args[1:]
 }
 
-// We absolutely must not allow command escaping. e.g magerun cache:clean; rm -rf /
+// We absolutely must not allow command escaping. e.g. magerun cache:clean; rm -rf /
 func sanitizeCommandArgs(args []string) []string {
 	var sanitizedArgs []string
 	disallowed := []string{";", "&&", "||", "|", "`", "$", "(", ")", "<", ">", "!"}
