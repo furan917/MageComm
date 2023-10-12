@@ -12,7 +12,7 @@ func Indicator(stopLoading chan bool) {
 	for {
 		select {
 		case <-stopLoading:
-			fmt.Print("\r")
+			fmt.Print("\r\x1b[K") // clear line
 			return
 		default:
 			fmt.Printf("\rWaiting on response: Press ENTER to stop... %s", loadingChars[i])

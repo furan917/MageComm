@@ -32,27 +32,36 @@ func init() {
 func ConfigureLogPath(logFile string) {
 	folderPath := filepath.Dir(logFile)
 	if _, err := os.Stat(folderPath); os.IsNotExist(err) {
-		Log.Fatal("Log target folder does not exist, please contact your system administrator")
+		Log.Errorf("Log target folder does not exist, please contact your system administrator")
 	}
 
 	if _, err := os.Stat(logFile); os.IsNotExist(err) {
-		file, err := os.Create(logFile)
-		if err != nil {
-			Log.Fatal("Unable to create log file, please contact your system administrator")
+		if err := createLogFile(logFile); err != nil {
+			Log.Errorf("Unable to create log file, please contact your system administrator")
 		}
-		defer func(file *os.File) {
-			err := file.Close()
-			if err != nil {
-				Log.Fatal("Unable to close log file, please contact your system administrator")
-			}
-		}(file)
 	}
 
-	f, err := os.OpenFile(logFile, os.O_WRONLY|os.O_CREATE, 0755)
+	file, err := os.OpenFile(logFile, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0755)
 	if err != nil {
-		Log.Fatal("Unable to open log file, please contact your system administrator")
+		logrus.SetOutput(os.Stdout)
+		Log.Errorf("Unable to open log file, printing to stdout, please contact your system administrator")
+		return
 	}
-	logrus.SetOutput(f)
+
+	logrus.SetOutput(file)
+}
+
+func createLogFile(logFile string) error {
+	file, err := os.Create(logFile)
+	if err != nil {
+		return err
+	}
+	defer func(file *os.File) {
+		if err := file.Close(); err != nil {
+			Log.Fatal("Unable to close log file, please contact your system administrator")
+		}
+	}(file)
+	return nil
 }
 
 func EnableDebugMode() {
@@ -63,6 +72,7 @@ func SetLogLevel(level string) {
 	logrusLevel, err := logrus.ParseLevel(strings.ToLower(level))
 	if err != nil {
 		logrus.Warnf("Invalid log level: %s, defaulting to %s", level, logrus.WarnLevel.String())
+		logrusLevel = logrus.WarnLevel
 	}
 
 	logrus.SetLevel(logrusLevel)

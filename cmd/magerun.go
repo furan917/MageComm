@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/google/uuid"
 	"github.com/spf13/cobra"
+	"magecomm/common"
 	"magecomm/config_manager"
 	"magecomm/logger"
 	"magecomm/messages/listener"
@@ -33,17 +34,17 @@ var MagerunCmd = &cobra.Command{
 		}
 
 		command := magerunArgs[0]
-		if !config_manager.IsMageRunCommandAllowed(command) {
-			return fmt.Errorf("the command '%s' is not allowed", command)
+		if isCmdAllowed, err := config_manager.IsMageRunCommandAllowed(command); !isCmdAllowed {
+			return err
 		}
 
-		if config_manager.IsRestrictedCommandArgsIncluded(command, magerunArgs[1:]) {
-			return fmt.Errorf("the command '%s' is not allowed with the following arguments: %s", command, strings.Join(magerunArgs[1:], " "))
+		if isRestrictedArgsIncluded, err := config_manager.IsRestrictedCommandArgsIncluded(command, magerunArgs[1:]); isRestrictedArgsIncluded {
+			return err
 		}
 
 		if isAllRequiredArgsIncluded, missingRequiredArgs := config_manager.IsRequiredCommandArgsIncluded(command, magerunArgs[1:]); !isAllRequiredArgsIncluded {
 			prompt := fmt.Sprintf("The command '%s' is missing required arguments: %s. Do you want to run this command and include them?", command, strings.Join(missingRequiredArgs, " "))
-			confirmed, err := PromptUserForConfirmation(prompt)
+			confirmed, err := common.PromptUserForConfirmation(prompt)
 			if err != nil {
 				return fmt.Errorf("error while reading user input: %v", err)
 			}
@@ -72,6 +73,7 @@ func handleMageRunCmdMessage(args []string) error {
 	}
 
 	if correlationID == "" {
+		logger.Warnf("Command executed, but no output could be returned")
 		fmt.Println("Command executed, but no output could be returned")
 		return nil
 	}
@@ -82,6 +84,7 @@ func handleMageRunCmdMessage(args []string) error {
 	}
 
 	if output != "" {
+		logger.Infof("Output printed to terminal")
 		fmt.Println(output)
 	}
 

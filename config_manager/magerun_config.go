@@ -1,7 +1,7 @@
 package config_manager
 
 import (
-	"magecomm/logger"
+	"fmt"
 	"strings"
 )
 
@@ -48,7 +48,7 @@ var defaultAllowedCommands = []string{
 	"yotpo:sync",
 }
 
-func IsMageRunCommandAllowed(command string) bool {
+func IsMageRunCommandAllowed(command string) (bool, error) {
 	var allowedCommands []string
 
 	allowedCommandsConfig := GetValue(CommandConfigAllowedMageRunCommands)
@@ -60,36 +60,41 @@ func IsMageRunCommandAllowed(command string) bool {
 
 	for _, allowedCommand := range allowedCommands {
 		if allowedCommand == command {
-			return true
+			return true, nil
 		}
 	}
 	// print allowed commands
-	logger.Fatalf("`%s` Command not allowed, allowed commands are:\n%s \n", command, strings.Join(allowedCommands, ",\n"))
-	return false
+	errorMsg := "`%s` Command not allowed, allowed commands are:\n%s \n"
+	return false, fmt.Errorf(errorMsg, command, strings.Join(allowedCommands, ",\n"))
 }
 
-func IsRestrictedCommandArgsIncluded(command string, args []string) bool {
+func IsRestrictedCommandArgsIncluded(command string, args []string) (bool, error) {
 	restrictedArgsString := GetValue(CommandConfigRestrictedMagerunCommandArgs)
 	if restrictedArgsString == "" {
-		return false
+		return false, nil
 	}
 	restrictedCommandArgMap := ParseCommandArgsMap(restrictedArgsString)
-
 	restrictedArgsList, commandExists := restrictedCommandArgMap[command]
+	//Exit early if no restrictions
 	if !commandExists {
-		return false
+		return false, nil
 	}
-	// in go it is more performant to use maps with null/"" values to reduce search complexity from a linear (O(n)) to a constant (O(1))
-	// but for the sake of configuration simplicity, we use a mapped list
+	// in go, it is more performant to use maps with null/"" values to reduce search complexity from a linear (O(n)) to a constant (O(1))
+	// but for the sake of configuration simplicity and avoiding type juggling, we use a mapped list
+	var restrictedArgsUsed []string
 	for _, arg := range args {
 		for _, restrictedArg := range restrictedArgsList {
 			if arg == restrictedArg {
-				return true
+				restrictedArgsUsed = append(restrictedArgsUsed, arg)
 			}
 		}
 	}
 
-	return false
+	if len(restrictedArgsUsed) > 0 {
+		return true, fmt.Errorf("cannot use the following arguments with the command '%s': %s", command, strings.Join(restrictedArgsUsed, ", "))
+	}
+
+	return false, nil
 }
 
 func IsRequiredCommandArgsIncluded(command string, args []string) (bool, []string) {

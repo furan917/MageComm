@@ -13,6 +13,7 @@ func (handler *MagerunOutputHandler) ProcessMessage(messageBody string, correlat
 		return fmt.Errorf("message body is empty")
 	}
 	fmt.Println(messageBody)
+	logger.Infof("Incoming message with correlationID: %s", correlationID)
 	logger.Infof("Message body: %s", messageBody)
 
 	return nil
