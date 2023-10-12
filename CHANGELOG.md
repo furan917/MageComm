@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.1.9](https://github.com/furan917/MageComm/compare/v0.1.8...v0.1.9) (2023-10-11)
+
+
+### Bug Fixes
+
+* Clear line properly for waiting indicator ([9bfe765](https://github.com/furan917/MageComm/commit/9bfe7652c394322cc49bc75fd12ad13d343b1b3d))
+* error output now properly included in return ([7da6a34](https://github.com/furan917/MageComm/commit/7da6a347aa8f9325bd68c1e234383c25fa1e09ce))
+* fix no output returns + functionality to strip content ([869942f](https://github.com/furan917/MageComm/commit/869942f2239373df5605e50005e2880becbb1e1b))
+* Fix tests for basic magerun command send ([5928164](https://github.com/furan917/MageComm/commit/59281648548b6a10a97e598ce3b755250feb71aa))
+
 ## [0.1.8](https://github.com/furan917/MageComm/compare/v0.1.7...v0.1.8) (2023-09-18)
 
 

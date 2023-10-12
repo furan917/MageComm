@@ -2,6 +2,7 @@ package config_manager
 
 import (
 	"encoding/json"
+	"errors"
 	"github.com/spf13/viper"
 	"magecomm/common"
 	"magecomm/logger"
@@ -13,6 +14,7 @@ import (
 const (
 	ConfigLogPath                             = "magecomm_log_path"
 	ConfigLogLevel                            = "magecomm_log_level"
+	ConfigPrintoutLogLevel                    = "magecomm_printout_log_level"
 	CommandConfigMaxOperationalCpuLimit       = "magecomm_max_operational_cpu_limit"
 	CommandConfigMaxOperationalMemoryLimit    = "magecomm_max_operational_memory_limit"
 	CommandConfigEnvironment                  = "magecomm_environment"
@@ -24,6 +26,7 @@ const (
 	CommandConfigAllowedMageRunCommands       = "magecomm_allowed_magerun_commands"
 	CommandConfigRestrictedMagerunCommandArgs = "magecomm_restricted_magerun_command_args"
 	CommandConfigRequiredMagerunCommandArgs   = "magecomm_required_magerun_command_args"
+	CommandConfigForceMagerunNoInteraction    = "magecomm_force_magerun_no_interaction"
 	CommandConfigDeployArchiveFolder          = "magecomm_deploy_archive_path"
 	CommandConfigDeployArchiveLatestFile      = "magecomm_deploy_archive_latest_file"
 
@@ -70,6 +73,7 @@ func getDefault(key string) string {
 	defaults := map[string]string{
 		ConfigLogPath:                          "",
 		ConfigLogLevel:                         "warn",
+		ConfigPrintoutLogLevel:                 "error",
 		CommandConfigMaxOperationalCpuLimit:    "80",
 		CommandConfigMaxOperationalMemoryLimit: "80",
 		CommandConfigEnvironment:               "default",
@@ -79,6 +83,7 @@ func getDefault(key string) string {
 		CommandConfigPublisherOutputTimeout:    "600",
 		CommandConfigMageRunCommandPath:        "",
 		CommandConfigAllowedMageRunCommands:    "",
+		CommandConfigForceMagerunNoInteraction: "true",
 		CommandConfigDeployArchiveFolder:       "/srv/magecomm/deploy/",
 		CommandConfigDeployArchiveLatestFile:   "latest.tar.gz",
 		ConfigSlackEnabled:                     "false",
@@ -120,7 +125,8 @@ func Configure(overrideFile string) {
 	err := viper.ReadInConfig()
 	if err != nil {
 		// If the configuration file does not exist, warn user that env vars will be used
-		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
+		var configFileNotFoundError viper.ConfigFileNotFoundError
+		if errors.As(err, &configFileNotFoundError) {
 			logger.Infof("No config file found, reading fully from env vars, this is less secure")
 		} else {
 			logger.Warnf("Failed to read the config file, reading from ENV vars, this is less secure: %v", err)

@@ -23,6 +23,12 @@ func (handler *MagerunHandler) ProcessMessage(messageBody string, correlationID 
 	if err != nil {
 		output = output + err.Error()
 	}
+	output = strings.TrimSpace(output)
+
+	//if output is empty return "command finished with no out
+	if output == "" {
+		output = "Command finished with no output"
+	}
 
 	if config_manager.GetBoolValue(config_manager.ConfigSlackEnabled) && !config_manager.GetBoolValue(config_manager.ConfigSlackDisableOutputNotifications) {
 		logger.Infof("Slack notification is enabled, sending output notification")
@@ -43,7 +49,7 @@ func (handler *MagerunHandler) ProcessMessage(messageBody string, correlationID 
 	if err != nil {
 		logger.Warnf("Error publishing message to RMQ/SQS queue: %s", err)
 	}
-	logger.Debugf("Publishing output to queue: %s with correlation ID: %s", queues.MapQueueToOutputQueue(MageRunQueue), correlationID)
+	logger.Infof("Publishing output to queue: %s with correlation ID: %s", queues.MapQueueToOutputQueue(MageRunQueue), correlationID)
 	_, err = publisherClass.Publish(output, queues.MapQueueToOutputQueue(MageRunQueue), correlationID)
 	if err != nil {
 		return err

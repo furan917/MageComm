@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fmt"
 	"github.com/spf13/cobra"
 	"magecomm/config_manager"
 	"magecomm/logger"
@@ -14,29 +15,28 @@ import (
 var ListenCmd = &cobra.Command{
 	Use:   "listen [queue1] [queue2] ...",
 	Short: "Listen for messages from specified queues, fallback to ENV LISTENERS, use -e or ENV LISTENER_ENGINE to specify engine (sqs|rmq), default sqs",
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		queueNames := args
 		if len(queueNames) == 0 {
-			queuesFromEnv := config_manager.GetValue(config_manager.CommandConfigListeners)
-			if queuesFromEnv == "" {
-				logger.Fatal("No queues specified")
-				return
+			queuesFromConfig := config_manager.GetValue(config_manager.CommandConfigListeners)
+			if queuesFromConfig == "" {
+				return fmt.Errorf("no queues specified")
 			}
-			queueNames = strings.Split(queuesFromEnv, ",")
+			logger.Infof("No queues specified, using queues from Config: %s", queuesFromConfig)
+			fmt.Printf("No queues specified, using queues from Config: %s", queuesFromConfig)
+			queueNames = strings.Split(queuesFromConfig, ",")
 		}
 
 		//if queueNames not in allowed queues, return error
 		for _, queueName := range queueNames {
 			if !config_manager.IsAllowedQueue(queueName) {
-				logger.Fatalf("Queue %s is not allowed, allowed queues: %s", queueName, config_manager.GetAllowedQueues())
-				return
+				return fmt.Errorf("queue '%s' is not allowed, allowed queues: %s", queueName, config_manager.GetAllowedQueues())
 			}
 		}
 
 		listener, err := listener.MapListenerToEngine()
 		if err != nil {
-			logger.Fatal(err)
-			return
+			return fmt.Errorf("error creating listener: %s", err)
 		}
 
 		// Create a channel to handle program termination or interruption signals so we can kill any connections if needed
@@ -45,5 +45,7 @@ var ListenCmd = &cobra.Command{
 		go listener.ListenToService(queueNames)
 		<-sigChan
 		listener.Close()
+
+		return nil
 	},
 }
