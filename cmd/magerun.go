@@ -100,16 +100,16 @@ func handleGlobalArguments(args []string) []string {
 	// global Arg handling must be done manually
 	var globalArguments []string
 	var overrideFilePath string
+	var enableDebugLogging bool
 
 	//Note arguments between start and magerun command.
 	for i, arg := range args {
 		if strings.HasPrefix(arg, "--") {
 			globalArguments = append(globalArguments, arg)
 
-			//if arg is --debug then enable debug mode
+			//if arg is --debug then flag debug to be enabled after configuration step
 			if arg == "--debug" {
-				logger.Warnf("Magerun: Debug mode enabled")
-				logger.EnableDebugMode()
+				enableDebugLogging = true
 			}
 
 			//if arg is --config then configure
@@ -135,6 +135,10 @@ func handleGlobalArguments(args []string) []string {
 			//We have reached the magerun command, so exit loop
 			break
 		}
+	}
+
+	if enableDebugLogging {
+		logger.EnableDebugMode()
 	}
 
 	config_manager.Configure(overrideFilePath)

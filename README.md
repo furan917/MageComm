@@ -9,8 +9,6 @@ The tool looks for a configuration file in `/etc/magecomm/`(unix) / `%APPDATA%\m
 
 ## Beta
 Currently this tool is in beta, and is not recommended for production use.
-Tested commands: RMQ based magerun command publishing, message listening, cat all supported archive types
-
 
 ## Installation
 
@@ -22,6 +20,7 @@ Download the latest release from the [releases page](https://github.com/furan917
 
 example config.yml:
 ```
+disallow_configfile_overwrite: true
 magecomm_log_path: /var/log/magecomm.log
 magecomm_log_level: warn
 magecomm_max_operational_cpu_limit: 80
@@ -64,6 +63,7 @@ magecomm_required_magerun_command_args:
 example config.json:
 ```
 {
+  "disallow_configfile_overwrite": true,
   "magecomm_log_path": "/var/log/magecomm.log",
   "magecomm_log_level": "warn",
   "magecomm_max_operational_cpu_limit": 80,
@@ -117,11 +117,14 @@ example config.json:
 ### Global Flags
 
 - `--debug`: Enable debug mode
+- `--config`: Path to overwrite config file, argument can be disabled by default config file
 
 e.g  
 `magecomm --debug listen`  
 `magecomm --debug magerun cache:clean`  
 `magecomm --debug cat path/to/archive.tar.gz /path/to/file.txt`
+`magecomm --config=/custom/config/path.json magerun indexer:status`
+`magecomm --config=/custom/config/path.json --debug magerun indexer:reindex`
 
 ### Commands
 
@@ -143,11 +146,15 @@ e.g
 
 ## Configuration
 
-The tool can be configured using a yaml or json config file at `/etc/magecomm/`(unix) / `%APPDATA%\magecomm\`(windows)  or by environment variables.
-lowercase for file based config, uppercase for ENV.
+The tool can be configured using a yaml or json config file at `/etc/magecomm/` (unix) | `%APPDATA%\magecomm\` (windows), or using `--config=/custom/config/path.json` before the command e.g. `magecomm --config=... magerun`, or by ENV variables.
+Magecomm has a fallback strategy of, config file -> ENV -> default values
 
-The tool supports slack command run notifications via Webhook or App integration
+_You can disable by the config override argument by placing `disallow_configfile_overwrite: true` in the default config file_
 
+The tool can also supports slack command run notifications via Webhook or App integration
+
+## Config Options
+_All caps for envs, lowercase for config file_
 - `MAGECOMM_LOG_PATH`: Path to log file, default: SYSLOG
 - `MAGECOMM_LOG_LEVEL`: Log level, default: WARN, options (TRACE, DEBUG, INFO, WARN, ERROR, FATAL, PANIC)
 - `MAGECOMM_MAX_OPERATIONAL_CPU_LIMIT`: Maximum CPU limit of system before we defer processing messages, default: 80

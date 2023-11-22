@@ -1,6 +1,6 @@
 package logger
 
-// This package is used to log messages easily It is a wrapper around the logrus package.
+// This package is used to Log messages easily It is a wrapper around the logrus package.
 
 import (
 	"github.com/sirupsen/logrus"
@@ -19,14 +19,17 @@ const (
 	PanicLevel = logrus.PanicLevel
 )
 
-var Log *logrus.Logger
+var (
+	Log          *logrus.Logger
+	debugFlagSet bool
+)
 
 func init() {
-	logrus.SetFormatter(&logrus.TextFormatter{
+	Log = logrus.StandardLogger()
+	Log.SetFormatter(&logrus.TextFormatter{
 		FullTimestamp: true,
 	})
-	logrus.SetLevel(logrus.WarnLevel)
-	Log = logrus.StandardLogger()
+	Log.SetLevel(logrus.WarnLevel)
 }
 
 func ConfigureLogPath(logFile string) {
@@ -37,18 +40,23 @@ func ConfigureLogPath(logFile string) {
 
 	if _, err := os.Stat(logFile); os.IsNotExist(err) {
 		if err := createLogFile(logFile); err != nil {
-			Log.Errorf("Unable to create log file, please contact your system administrator")
+			Log.Errorf("Unable to create Log file, please contact your system administrator")
 		}
 	}
 
 	file, err := os.OpenFile(logFile, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0755)
 	if err != nil {
-		logrus.SetOutput(os.Stdout)
-		Log.Errorf("Unable to open log file, printing to stdout, please contact your system administrator")
+		Log.SetOutput(os.Stdout)
+		Log.Errorf("Unable to open Log file, printing to stdout, please contact your system administrator")
 		return
 	}
 
-	logrus.SetOutput(file)
+	//Log.SetFormatter(&logrus.JSONFormatter{})
+	Log.SetFormatter(&logrus.TextFormatter{
+		FullTimestamp: true,
+	})
+	Log.SetOutput(file)
+	Log.Infof("Logging to file: %s", file.Name())
 }
 
 func createLogFile(logFile string) error {
@@ -58,7 +66,7 @@ func createLogFile(logFile string) error {
 	}
 	defer func(file *os.File) {
 		if err := file.Close(); err != nil {
-			Log.Fatal("Unable to close log file, please contact your system administrator")
+			Log.Fatal("Unable to close Log file, please contact your system administrator")
 		}
 	}(file)
 	return nil
@@ -66,16 +74,23 @@ func createLogFile(logFile string) error {
 
 func EnableDebugMode() {
 	SetLogLevel(logrus.DebugLevel.String())
+	debugFlagSet = true
 }
 
 func SetLogLevel(level string) {
+	if debugFlagSet {
+		Log.Info("Debug mode enabled by flag, ignoring log level configuration")
+		return
+	}
+
 	logrusLevel, err := logrus.ParseLevel(strings.ToLower(level))
 	if err != nil {
-		logrus.Warnf("Invalid log level: %s, defaulting to %s", level, logrus.WarnLevel.String())
+		Log.Warnf("Invalid Log level: %s, defaulting to %s", level, logrus.WarnLevel.String())
 		logrusLevel = logrus.WarnLevel
 	}
 
-	logrus.SetLevel(logrusLevel)
+	Log.SetLevel(logrusLevel)
+	Log.Infof("Log level set to %s", logrusLevel)
 }
 
 func Trace(args ...interface{}) {
@@ -111,25 +126,25 @@ func Tracef(format string, args ...interface{}) {
 }
 
 func Debugf(format string, args ...interface{}) {
-	logrus.Debugf(format, args...)
+	Log.Debugf(format, args...)
 }
 
 func Infof(format string, args ...interface{}) {
-	logrus.Infof(format, args...)
+	Log.Infof(format, args...)
 }
 
 func Warnf(format string, args ...interface{}) {
-	logrus.Warnf(format, args...)
+	Log.Warnf(format, args...)
 }
 
 func Errorf(format string, args ...interface{}) {
-	logrus.Errorf(format, args...)
+	Log.Errorf(format, args...)
 }
 
 func Fatalf(format string, args ...interface{}) {
-	logrus.Fatalf(format, args...)
+	Log.Fatalf(format, args...)
 }
 
 func Panicf(format string, args ...interface{}) {
-	logrus.Panicf(format, args...)
+	Log.Panicf(format, args...)
 }

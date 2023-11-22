@@ -7,6 +7,7 @@ import (
 	"magecomm/logger"
 	"magecomm/notifictions"
 	"magecomm/services"
+	"strings"
 )
 
 var RootCmd = &cobra.Command{
@@ -14,14 +15,14 @@ var RootCmd = &cobra.Command{
 	Short: "MageComm CLI is a command line tool for managing Magento applications",
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 
-		overrideFilePath, _ := cmd.Flags().GetString("config")
-		config_manager.Configure(overrideFilePath)
-		initializeModuleWhichRequireConfig()
-
 		debug, _ := cmd.Flags().GetBool("debug")
 		if debug {
 			logger.EnableDebugMode()
 		}
+
+		overrideFilePath, _ := cmd.Flags().GetString("config")
+		config_manager.Configure(overrideFilePath)
+		initializeModuleWhichRequireConfig()
 	},
 }
 
@@ -43,6 +44,6 @@ func main() {
 
 	err := RootCmd.Execute()
 	if err != nil {
-		logger.Fatalf("Failed to execute command: %s", err)
+		logger.Fatalf("Failed to execute command: %s", strings.ReplaceAll(err.Error(), "\n", " "))
 	}
 }
