@@ -200,5 +200,6 @@ func (listener *SqsListener) ListenToService(queueNames []string) {
 
 func (listener *SqsListener) Close() {
 	close(listener.stopChan)
-	listener.waitGroup.Wait()
+	logger.Infof("Stopped listening to queues")
+	fmt.Println("Stopped listening to queues")
 }

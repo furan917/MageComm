@@ -105,47 +105,72 @@ func getDefault(key string) string {
 }
 
 func Configure(overrideFile string) {
-	if overrideFile != "" {
-		viper.SetConfigFile(overrideFile)
-	} else {
-		// Set base folder and file name of config file
-		viper.SetConfigName("config")
-		if runtime.GOOS == "windows" {
-			viper.AddConfigPath(os.Getenv("APPDATA") + "\\magecomm\\")
-		} else {
-			viper.AddConfigPath("/etc/magecomm/")
-		}
-		// Search for json config file first, then fallback to yaml
-		viper.SetConfigType("json")
-		if err := viper.ReadInConfig(); err != nil {
-			viper.SetConfigType("yaml")
-		}
+	overrideFile = strings.TrimSpace(overrideFile)
+	overrideFile = strings.Trim(overrideFile, `'"`)
+	defaultConfigError := configureDefaultsConfig()
+	disallowOverwrite := viper.GetBool("disallow_configfile_overwrite")
+
+	if disallowOverwrite && overrideFile != "" {
+		logger.Warnf("Config file overwriting is disallowed, ignoring passed in config file")
 	}
 
-	err := viper.ReadInConfig()
-	if err != nil {
-		// If the configuration file does not exist, warn user that env vars will be used
-		var configFileNotFoundError viper.ConfigFileNotFoundError
-		if errors.As(err, &configFileNotFoundError) {
-			logger.Infof("No config file found, reading fully from env vars, this is less secure")
-		} else {
-			logger.Warnf("Failed to read the config file, reading from ENV vars, this is less secure: %v", err)
-			return
+	if !disallowOverwrite && overrideFile != "" {
+		viper.Reset()
+		viper.SetConfigFile(overrideFile)
+		err := viper.ReadInConfig()
+		if err != nil {
+			if defaultConfigError == nil {
+				logger.Warnf("Failed to read the config file, reapplying default config")
+				err := configureDefaultsConfig()
+				if err != nil {
+					// We checked for this above, so this should never happen
+				}
+			} else {
+				logger.Warnf("Failed to read the both the override and default config file, defaulting to env variable reading")
+			}
 		}
 	}
 
 	if logPath := GetValue(ConfigLogPath); logPath != "" {
 		logger.ConfigureLogPath(logPath)
-		logger.Infof("Logging to file: %s", logPath)
 	}
 
 	if logLevel := GetValue(ConfigLogLevel); logLevel != "" {
 		logger.SetLogLevel(logLevel)
-		logger.Infof("Logging level set to: %s", logLevel)
 	}
 
 	configName := viper.ConfigFileUsed()
 	logger.Infof("Using config file: %s", configName)
+}
+
+func configureDefaultsConfig() error {
+	viper.Reset()
+
+	viper.SetConfigName("config")
+	if runtime.GOOS == "windows" {
+		viper.AddConfigPath(os.Getenv("APPDATA") + "\\magecomm\\")
+	} else {
+		viper.AddConfigPath("/etc/magecomm/")
+	}
+	// Search for json config file first, then fallback to yaml
+	viper.SetConfigType("json")
+	if err := viper.ReadInConfig(); err != nil {
+		viper.SetConfigType("yaml")
+	}
+	err := viper.ReadInConfig()
+	if err != nil {
+		// If the configuration file does not exist, warn user that env vars will be used
+		var configFileNotFoundError viper.ConfigFileNotFoundError
+		if errors.As(err, &configFileNotFoundError) {
+			logger.Infof("No default config file found, reading fully from env vars, this is less secure")
+			return err
+		} else {
+			logger.Warnf("Failed to read the default config file, reading from ENV vars, this is less secure: %v", err)
+			return err
+		}
+	}
+
+	return nil
 }
 
 func GetBoolValue(key string) bool {

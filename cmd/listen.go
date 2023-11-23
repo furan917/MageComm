@@ -39,12 +39,17 @@ var ListenCmd = &cobra.Command{
 			return fmt.Errorf("error creating listener: %s", err)
 		}
 
-		// Create a channel to handle program termination or interruption signals so we can kill any connections if needed
+		//Create a channel to handle program termination or interruption signals so we can kill any connections if needed
 		sigChan := make(chan os.Signal, 1)
 		signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
-		go listener.ListenToService(queueNames)
-		<-sigChan
-		listener.Close()
+		go func() {
+			<-sigChan
+			logger.Infof("Received interruption signal. Shutting down gracefully...")
+			listener.Close()
+			os.Exit(0)
+		}()
+
+		listener.ListenToService(queueNames)
 
 		return nil
 	},

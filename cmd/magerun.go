@@ -24,11 +24,9 @@ var MagerunCmd = &cobra.Command{
 		//empty pre run to stop execution of parent RootCmd pre run
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
-
 		// handle global arguments (e.g. --config, --debug) as root command cannot due to DisableFlagParsing
 		var globalArguments = handleGlobalArguments(args)
 		magerunArgs := args[len(globalArguments):]
-
 		if len(magerunArgs) < 1 {
 			return fmt.Errorf("no command provided")
 		}
@@ -99,24 +97,48 @@ func initializeModuleWhichRequireConfig() {
 
 func handleGlobalArguments(args []string) []string {
 	// Replicates RootCmd.PersistentPreRunE as it is not usable when DisableFlagParsing is set to true
+	// global Arg handling must be done manually
 	var globalArguments []string
 	var overrideFilePath string
-	for _, arg := range args {
+	var enableDebugLogging bool
+
+	//Note arguments between start and magerun command.
+	for i, arg := range args {
 		if strings.HasPrefix(arg, "--") {
 			globalArguments = append(globalArguments, arg)
 
+			//if arg is --debug then flag debug to be enabled after configuration step
+			if arg == "--debug" {
+				enableDebugLogging = true
+			}
+
+			//if arg is --config then configure
 			if strings.HasPrefix(arg, "--config") {
-				// Catch both --config /file/path and --config=/file/path
-				overrideFilePath = strings.TrimPrefix(arg, "--config=")
-				overrideFilePath = strings.TrimPrefix(arg, "--config ")
+				var configPath string
+				if strings.Contains(arg, "=") {
+					configPath = strings.Split(arg, "=")[1]
+				} else {
+					//ensure next argument is config path
+					if len(args) > i+1 && !strings.HasPrefix(args[i+1], "--") {
+						configPath = args[i+1]
+						//Ensure we remove the config path from args to avoid breaking early
+						args = append(args[:i+1], args[i+2:]...)
+					}
+				}
+				if configPath == "" {
+					logger.Warnf("No config file path provided with argument, using default config file path")
+				}
+
+				overrideFilePath = strings.Trim(configPath, `"'`)
 			}
-			if strings.HasPrefix(arg, "--debug") {
-				logger.EnableDebugMode()
-			}
-		}
-		if !strings.HasPrefix(arg, "--") {
+		} else {
+			//We have reached the magerun command, so exit loop
 			break
 		}
+	}
+
+	if enableDebugLogging {
+		logger.EnableDebugMode()
 	}
 
 	config_manager.Configure(overrideFilePath)
