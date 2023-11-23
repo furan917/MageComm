@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.1.10](https://github.com/furan917/MageComm/compare/v0.1.9...v0.1.10) (2023-11-23)
+
+
+### Bug Fixes
+
+* log formatting + add disallow override file option to config ([544767e](https://github.com/furan917/MageComm/commit/544767eb153363ee7707b6ceb30ca8cf432cfa99))
+* magerun command now handles config override correctly ([66eb5ea](https://github.com/furan917/MageComm/commit/66eb5eaad38b6dfaa885061779aa3218ccf162d5))
+* small fix for graceful interupts + some whitespacing fixes ([229a649](https://github.com/furan917/MageComm/commit/229a649443ffa8da1dd849ff26231e7ede389885))
+
 ## [0.1.9](https://github.com/furan917/MageComm/compare/v0.1.8...v0.1.9) (2023-10-11)
 
 
