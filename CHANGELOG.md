@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.1.11](https://github.com/furan917/MageComm/compare/v0.1.10...v0.1.11) (2023-11-24)
+
+
+### Bug Fixes
+
+* Add release pleas comment to version file ([b31cc8d](https://github.com/furan917/MageComm/commit/b31cc8d9c0641913fe134a24f543f6478251fb26))
+* add version command properly ([db3df42](https://github.com/furan917/MageComm/commit/db3df42d65a7603f9039fe6a5a5cae4d69ecceeb))
+* ensure version output is displayed without comment ([e79e230](https://github.com/furan917/MageComm/commit/e79e230ea70d70069517f79072cc5cba7e59a0da))
+
 ## [0.1.10](https://github.com/furan917/MageComm/compare/v0.1.9...v0.1.10) (2023-11-23)
 
 
