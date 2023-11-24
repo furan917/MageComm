@@ -39,7 +39,7 @@ func initializeModuleWhichRequireConfig() {
 
 func main() {
 	if len(os.Args) > 1 && os.Args[1] == "version" {
-		//Remove the release me comment from the version output
+		//Remove the release-please comment from the version output
 		version = strings.Split(version, "##")[0]
 		fmt.Printf("Magecomm Version: %s\n", strings.TrimSpace(version))
 		return
