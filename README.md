@@ -18,6 +18,8 @@ config file can be in yaml or json format e.g `config.yml` or `config.json`, ple
 
 Download the latest release from the [releases page](https://github.com/furan917/magecomm/releases) for your platform and extract to a directory in your PATH.
 
+Then check your installed version with `magecomm version`
+
 example config.yml:
 ```
 disallow_configfile_overwrite: true

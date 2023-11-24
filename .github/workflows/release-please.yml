@@ -16,6 +16,8 @@ jobs:
           token: ${{ secrets.PAT_TOKEN }}
           release-type: go
           package-name: "MageComm"
+          extra-files: |
+            version.txt
 
       - name: Log release info
         run: |
