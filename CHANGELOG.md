@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.12](https://github.com/furan917/MageComm/compare/v0.1.11...v0.1.12) (2023-11-27)
+
+
+### Bug Fixes
+
+* Slack command output disable affected full message instead of command output only ([0f1773d](https://github.com/furan917/MageComm/commit/0f1773de706b88305230188fa24f11e7da54e355))
+
 ## [0.1.11](https://github.com/furan917/MageComm/compare/v0.1.10...v0.1.11) (2023-11-24)
 
 
