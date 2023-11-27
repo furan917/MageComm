@@ -180,8 +180,8 @@ _All caps for envs, lowercase for config file_
 - `MAGECOMM_RMQ_PASS` Default: ``
 - `MAGECOMM_RMQ_TLS`  Default: `false`
 - `MAGECOMM_RMQ_VHOST` Default: `/`
-- `MAGECOMM_SLACK_ENABLED` Default: `false`, (true|false), if true you must configure the WEBHOOK or APP configurations to work
-- `MAGECOMM_SLACK_DISABLE_OUTPUT_NOTIFICATIONS` Default: 'false, (true|false), if true we will not send output notifications to slack
+- `MAGECOMM_SLACK_ENABLED` Default: `false`, (true|false), if true you must configure the WEBHOOK or APP configurations to work. When true will send to slack a message when a command has executed with the command, the environment it was on and the commands output
+- `MAGECOMM_SLACK_DISABLE_OUTPUT_NOTIFICATIONS` Default: `false`, (true|false), if true command outputs will not be sent to slack along with the execution message
 - `MAGECOMM_SLACK_WEBHOOK_URL` Default: ``
 - `MAGECOMM_SLACK_WEBHOOK_CHANNEL` Default: ``
 - `MAGECOMM_SLACK_WEBHOOK_USERNAME` Default: ``

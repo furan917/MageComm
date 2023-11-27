@@ -30,14 +30,22 @@ func (handler *MagerunHandler) ProcessMessage(messageBody string, correlationID 
 		output = "Command finished with no output"
 	}
 
-	if config_manager.GetBoolValue(config_manager.ConfigSlackEnabled) && !config_manager.GetBoolValue(config_manager.ConfigSlackDisableOutputNotifications) {
+	if config_manager.GetBoolValue(config_manager.ConfigSlackEnabled) {
 		logger.Infof("Slack notification is enabled, sending output notification")
 		notifier := notifictions.DefaultSlackNotifier
+		commandOutputMessage := ""
 		outputMessage := fmt.Sprintf(
-			" Command: '%v' on environment: '%s' ran with output: \n %s",
+			"Executed Command: '%v' on Environment: '%s'",
 			strings.Join(strings.Fields(messageBody), " "),
-			config_manager.GetValue(config_manager.CommandConfigEnvironment),
-			output)
+			config_manager.GetValue(config_manager.CommandConfigEnvironment))
+
+		if !config_manager.GetBoolValue(config_manager.ConfigSlackDisableOutputNotifications) {
+			commandOutputMessage = fmt.Sprintf(
+				"Returned with output: \n %s",
+				output)
+			outputMessage = outputMessage + "\n" + commandOutputMessage
+		}
+
 		err := notifier.Notify(fmt.Sprintf(outputMessage))
 		if err != nil {
 			logger.Warnf("Failed to send slack output notification: %v\n", err)
