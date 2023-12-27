@@ -1,7 +1,7 @@
 # MageComm CLI Tool
 
-MageComm CLI is a command line tool for managing Magento applications. It provides a convenient way to execute restricted magerun commands, manage deployments, and cat specific files within an archive.
-The main use case for this tool is to provide a way to execute magerun commands in a controlled manner via a messaging service. This allows us to execute commands on a remote server without exposing the application server itself
+MageComm CLI is a command line tool for managing Magento applications. It provides a convenient way to execute restricted magerun commands, and cat specific files within an archive.
+The main use case for this tool is to provide a way to execute magerun commands in a controlled manner via a messaging service. This allows us to execute commands on a remote server without exposing the application server.
 
 *It is important to note that the environment configuration/env is important to set if you plan to use this tool in a shared rmq/sqs instance as this will prefix your queues to avoid cross communication*
 
