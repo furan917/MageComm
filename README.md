@@ -124,9 +124,9 @@ example config.json:
 e.g  
 `magecomm --debug listen`  
 `magecomm --debug magerun cache:clean`  
-`magecomm --debug cat path/to/archive.tar.gz /path/to/file.txt`
-`magecomm --config=/custom/config/path.json magerun indexer:status`
-`magecomm --config=/custom/config/path.json --debug magerun indexer:reindex`
+`magecomm --debug cat path/to/archive.tar.gz /path/to/file.txt`  
+`magecomm --config=/custom/config/path.json magerun indexer:status`  
+`magecomm --config=/custom/config/path.json --debug magerun indexer:reindex`  
 
 ### Commands
 
