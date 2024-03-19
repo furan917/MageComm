@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.13](https://github.com/furan917/MageComm/compare/v0.1.12...v0.1.13) (2024-03-19)
+
+
+### Bug Fixes
+
+* Ensure logrus always has the right logfile before logging ([ba34b51](https://github.com/furan917/MageComm/commit/ba34b51a2266490cf20f9cd06812ee1426e42797))
+
 ## [0.1.12](https://github.com/furan917/MageComm/compare/v0.1.11...v0.1.12) (2023-11-27)
 
 
