@@ -21,6 +21,7 @@ const (
 
 var (
 	Log          *logrus.Logger
+	LogFile      string
 	debugFlagSet bool
 )
 
@@ -56,6 +57,7 @@ func ConfigureLogPath(logFile string) {
 		FullTimestamp: true,
 	})
 	Log.SetOutput(file)
+	LogFile = logFile
 	Log.Infof("Logging to file: %s", file.Name())
 }
 
@@ -93,58 +95,108 @@ func SetLogLevel(level string) {
 	Log.Infof("Log level set to %s", logrusLevel)
 }
 
+// Reapply log filepath to logrus logger to avoid log rotation issues
+// Truthfully I cant be bothered making windows & unix compatible file descriptor checks as Log.Out is not updated, so this is will do for now
+func logRotateHandler() {
+	if LogFile == "" {
+		return
+	}
+	file, _ := os.OpenFile(LogFile, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0755)
+	Log.SetOutput(file)
+}
+
+func logWithLevel(level logrus.Level, args ...interface{}) {
+	logRotateHandler()
+	switch level {
+	case TraceLevel:
+		Log.Trace(args...)
+	case DebugLevel:
+		Log.Debug(args...)
+	case InfoLevel:
+		Log.Info(args...)
+	case WarnLevel:
+		Log.Warn(args...)
+	case ErrorLevel:
+		Log.Error(args...)
+	case FatalLevel:
+		Log.Fatal(args...)
+	case PanicLevel:
+		Log.Panic(args...)
+	}
+}
+
+func logFormattedWithLevel(level logrus.Level, format string, args ...interface{}) {
+	logRotateHandler()
+	switch level {
+	case TraceLevel:
+		Log.Tracef(format, args...)
+	case DebugLevel:
+		Log.Debugf(format, args...)
+	case InfoLevel:
+		Log.Infof(format, args...)
+	case WarnLevel:
+		Log.Warnf(format, args...)
+	case ErrorLevel:
+		Log.Errorf(format, args...)
+	case FatalLevel:
+		Log.Fatalf(format, args...)
+	case PanicLevel:
+		Log.Panicf(format, args...)
+	}
+}
+
 func Trace(args ...interface{}) {
-	Log.Trace(args...)
+	logWithLevel(TraceLevel, args...)
 }
 
 func Debug(args ...interface{}) {
-	Log.Debug(args...)
+	logWithLevel(DebugLevel, args...)
 }
 
 func Info(args ...interface{}) {
-	Log.Info(args...)
+	logWithLevel(InfoLevel, args...)
 }
 
 func Warn(args ...interface{}) {
-	Log.Warn(args...)
+	logWithLevel(WarnLevel, args...)
 }
 
 func Error(args ...interface{}) {
-	Log.Error(args...)
+	logWithLevel(ErrorLevel, args...)
 }
 
 func Fatal(args ...interface{}) {
-	Log.Fatal(args...)
+	logWithLevel(FatalLevel, args...)
 }
 
 func Panic(args ...interface{}) {
-	Log.Panic(args...)
+	logWithLevel(PanicLevel, args...)
 }
 
 func Tracef(format string, args ...interface{}) {
-	Log.Tracef(format, args...)
+	logFormattedWithLevel(TraceLevel, format, args...)
 }
 
 func Debugf(format string, args ...interface{}) {
-	Log.Debugf(format, args...)
+	logFormattedWithLevel(DebugLevel, format, args...)
 }
 
 func Infof(format string, args ...interface{}) {
-	Log.Infof(format, args...)
+	logFormattedWithLevel(InfoLevel, format, args...)
 }
 
 func Warnf(format string, args ...interface{}) {
-	Log.Warnf(format, args...)
+	logFormattedWithLevel(WarnLevel, format, args...)
 }
 
 func Errorf(format string, args ...interface{}) {
-	Log.Errorf(format, args...)
+	logFormattedWithLevel(ErrorLevel, format, args...)
 }
 
 func Fatalf(format string, args ...interface{}) {
-	Log.Fatalf(format, args...)
+	logFormattedWithLevel(FatalLevel, format, args...)
 }
 
 func Panicf(format string, args ...interface{}) {
-	Log.Panicf(format, args...)
+	logFormattedWithLevel(PanicLevel, format, args...)
 }
