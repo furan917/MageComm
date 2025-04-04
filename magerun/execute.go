@@ -111,6 +111,11 @@ func getMageRunCommand() string {
 }
 
 func parseMagerunCommand(messageBody string) (string, []string) {
+	//if messageBody contains \" or \' then replace with " or '
+	escapedQuotePattern := `\\(["'])`
+	re := regexp.MustCompile(escapedQuotePattern)
+	messageBody = re.ReplaceAllString(messageBody, `$1`)
+
 	args := strings.Fields(messageBody)
 	return args[0], args[1:]
 }
