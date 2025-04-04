@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.14](https://github.com/furan917/MageComm/compare/v0.1.13...v0.1.14) (2025-04-04)
+
+
+### Bug Fixes
+
+* handle escape quotes in message strings ([fdf6bf3](https://github.com/furan917/MageComm/commit/fdf6bf33366d64a577085022f139695dd4ad8a05))
+
 ## [0.1.13](https://github.com/furan917/MageComm/compare/v0.1.12...v0.1.13) (2024-03-19)
 
 
