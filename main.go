@@ -3,7 +3,6 @@ package main
 import (
 	_ "embed"
 	"fmt"
-	"github.com/spf13/cobra"
 	"magecomm/cmd"
 	"magecomm/config_manager"
 	"magecomm/logger"
@@ -11,6 +10,8 @@ import (
 	"magecomm/services"
 	"os"
 	"strings"
+
+	"github.com/spf13/cobra"
 )
 
 //go:embed version.txt
@@ -48,8 +49,6 @@ func main() {
 	RootCmd.AddCommand(cmd.ListenCmd)
 	RootCmd.AddCommand(cmd.MagerunCmd)
 	RootCmd.AddCommand(cmd.CatCmd)
-	//RootCmd.AddCommand(cmd.CatDeployCmd)
-	//RootCmd.AddCommand(cmd.DeployCmd)
 
 	RootCmd.PersistentFlags().String("config", "", "Path to config file")
 	RootCmd.PersistentFlags().Bool("debug", false, "Enable debug mode")

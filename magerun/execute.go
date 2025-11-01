@@ -3,7 +3,6 @@ package magerun
 import (
 	"bytes"
 	"fmt"
-	"magecomm/common"
 	"magecomm/config_manager"
 	"magecomm/logger"
 	"magecomm/notifictions"
@@ -14,8 +13,25 @@ import (
 
 const DefaultCommandMageRun = "magerun"
 
+var compiledPatterns map[*regexp.Regexp]string
+
+func init() {
+	patterns := map[string]string{
+		`(?i)(?:it's|it is) not recommended to run .*? as root user`: "",
+	}
+
+	compiledPatterns = make(map[*regexp.Regexp]string)
+	for pattern, replacement := range patterns {
+		compiledPatterns[regexp.MustCompile(pattern)] = replacement
+	}
+}
+
 func HandleMagerunCommand(messageBody string) (string, error) {
 	command, args := parseMagerunCommand(messageBody)
+	if command == "" {
+		return "", fmt.Errorf("no command provided")
+	}
+
 	args = sanitizeCommandArgs(args)
 
 	if isCmdAllowed, err := config_manager.IsMageRunCommandAllowed(command); !isCmdAllowed {
@@ -62,9 +78,9 @@ func executeMagerunCommand(args []string) (string, error) {
 		}
 	}
 
-	splitCmd := strings.Fields(mageRunCmdPath)
-	cmd := exec.Command(splitCmd[0], splitCmd[1:]...)
-	cmd.Args = append(cmd.Args, args...)
+	cmdParts := strings.Fields(mageRunCmdPath)
+	allArgs := append(cmdParts[1:], args...)
+	cmd := exec.Command(cmdParts[0], allArgs...)
 
 	var stdoutBuffer, stderrBuffer bytes.Buffer
 	cmd.Stdout = &stdoutBuffer
@@ -85,17 +101,10 @@ func executeMagerunCommand(args []string) (string, error) {
 }
 
 func stripMagerunOutput(output string) string {
-	patterns := map[string]string{
-		`(?i)(?:it's|it is) not recommended to run .*? as root user`: "",
-		//Add more regex patterns here with their corresponding replacement
-	}
-
 	strippedOutput := output
-	for pattern, replacement := range patterns {
-		re := regexp.MustCompile(pattern)
+	for re, replacement := range compiledPatterns {
 		strippedOutput = re.ReplaceAllString(strippedOutput, replacement)
 	}
-	//trim any leading or trailing whitespace
 	strippedOutput = strings.TrimSpace(strippedOutput)
 
 	return strippedOutput
@@ -117,6 +126,9 @@ func parseMagerunCommand(messageBody string) (string, []string) {
 	messageBody = re.ReplaceAllString(messageBody, `$1`)
 
 	args := strings.Fields(messageBody)
+	if len(args) == 0 {
+		return "", nil
+	}
 	return args[0], args[1:]
 }
 
@@ -125,11 +137,17 @@ func sanitizeCommandArgs(args []string) []string {
 	var sanitizedArgs []string
 	disallowed := []string{";", "&&", "||", "|", "`", "$", "(", ")", "<", ">", "!"}
 	for _, arg := range args {
-		if common.Contains(disallowed, arg) {
-			logger.Warnf("Command args contain potentially unsafe characters, removing arg: %s", arg)
-			continue
+		containsUnsafe := false
+		for _, char := range disallowed {
+			if strings.Contains(arg, char) {
+				logger.Warnf("Command args contain potentially unsafe characters, removing arg: %s", arg)
+				containsUnsafe = true
+				break
+			}
 		}
-		sanitizedArgs = append(sanitizedArgs, arg)
+		if !containsUnsafe {
+			sanitizedArgs = append(sanitizedArgs, arg)
+		}
 	}
 	return sanitizedArgs
 }

@@ -56,9 +56,8 @@ func CatFileFromArchive(archivePath string, filePath string) error {
 		return err
 	}
 	defer func(file *os.File) {
-		err := file.Close()
-		if err != nil {
-			panic(err)
+		if err := file.Close(); err != nil {
+			logger.Warnf("Failed to close file: %v", err)
 		}
 	}(file)
 
