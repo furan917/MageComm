@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.0](https://github.com/furan917/MageComm/compare/v0.1.14...v0.2.0) (2025-11-01)
+
+
+### Features
+
+* Add Output command for reading missed outputs ([ae719a0](https://github.com/furan917/MageComm/commit/ae719a05acf445dfb712f94205dbcc20ffb2d8d9))
+
 ## [0.1.14](https://github.com/furan917/MageComm/compare/v0.1.13...v0.1.14) (2025-04-04)
 
 
