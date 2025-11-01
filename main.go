@@ -49,6 +49,7 @@ func main() {
 	RootCmd.AddCommand(cmd.ListenCmd)
 	RootCmd.AddCommand(cmd.MagerunCmd)
 	RootCmd.AddCommand(cmd.CatCmd)
+	RootCmd.AddCommand(cmd.OutputsCmd)
 
 	RootCmd.PersistentFlags().String("config", "", "Path to config file")
 	RootCmd.PersistentFlags().Bool("debug", false, "Enable debug mode")

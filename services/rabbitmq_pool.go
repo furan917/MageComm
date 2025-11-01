@@ -2,9 +2,13 @@ package services
 
 import (
 	"errors"
-	"github.com/streadway/amqp"
+	"fmt"
+
 	"magecomm/config_manager"
+	"magecomm/logger"
 	"sync"
+
+	"github.com/streadway/amqp"
 )
 
 var (
@@ -20,7 +24,8 @@ type RabbitMQConnectionPool struct {
 }
 
 type RabbitMQChannelPool struct {
-	pool *sync.Pool
+	pool     *sync.Pool
+	connPool *RabbitMQConnectionPool
 }
 
 func Close() {
@@ -32,18 +37,19 @@ func Close() {
 func NewRabbitMQConnectionPool(initialSize int) *RabbitMQConnectionPool {
 	p := &sync.Pool{
 		New: func() interface{} {
-			rmqConn := NewRabbitMQConnection()
-			if err := rmqConn.Connect(""); err != nil {
-				return err
-			}
-			return rmqConn
+			return NewRabbitMQConnection()
 		},
 	}
 
 	cp := &RabbitMQConnectionPool{pool: p}
 
 	for i := 0; i < initialSize; i++ {
-		p.Put(p.New())
+		conn := NewRabbitMQConnection()
+		if err := conn.Connect(""); err != nil {
+			logger.Warnf("Failed to create initial RMQ connection: %v", err)
+			continue
+		}
+		p.Put(conn)
 	}
 
 	return cp
@@ -52,37 +58,58 @@ func NewRabbitMQConnectionPool(initialSize int) *RabbitMQConnectionPool {
 func NewRabbitMQChannelPool(connPool *RabbitMQConnectionPool, initialSize int) *RabbitMQChannelPool {
 	p := &sync.Pool{
 		New: func() interface{} {
-			conn, err := connPool.Get()
-			if err != nil {
-				return err
-			}
-			channel, err := conn.CreateChannel()
-			if err != nil {
-				return err
-			}
-			return channel
+			return nil
 		},
 	}
 
-	cp := &RabbitMQChannelPool{pool: p}
+	cp := &RabbitMQChannelPool{
+		pool:     p,
+		connPool: connPool,
+	}
 
 	for i := 0; i < initialSize; i++ {
-		p.Put(p.New())
+		conn, err := connPool.Get()
+		if err != nil {
+			logger.Warnf("Failed to get connection for initial channel: %v", err)
+			continue
+		}
+		channel, err := conn.CreateChannel()
+		if err != nil {
+			logger.Warnf("Failed to create initial RMQ channel: %v", err)
+			connPool.Put(conn)
+			continue
+		}
+		connPool.Put(conn)
+		p.Put(channel)
 	}
 
 	return cp
 }
 
 func (cp *RabbitMQConnectionPool) Get() (*RabbitMQConnection, error) {
-	conn := cp.pool.Get()
-	if conn == nil {
+	obj := cp.pool.Get()
+	if obj == nil {
 		return nil, ErrConnectionPoolClosed
 	}
-	return conn.(*RabbitMQConnection), nil
+
+	conn, ok := obj.(*RabbitMQConnection)
+	if !ok || conn == nil {
+		conn = NewRabbitMQConnection()
+	}
+
+	if conn.Connection == nil || conn.Connection.IsClosed() {
+		if err := conn.Connect(""); err != nil {
+			return nil, fmt.Errorf("failed to connect to RabbitMQ: %w", err)
+		}
+	}
+
+	return conn, nil
 }
 
 func (cp *RabbitMQConnectionPool) Put(conn *RabbitMQConnection) {
-	cp.pool.Put(conn)
+	if conn != nil && conn.Connection != nil && !conn.Connection.IsClosed() {
+		cp.pool.Put(conn)
+	}
 }
 
 func (cp *RabbitMQConnectionPool) Close() {
@@ -90,16 +117,33 @@ func (cp *RabbitMQConnectionPool) Close() {
 }
 
 func (cp *RabbitMQChannelPool) Get() (*amqp.Channel, error) {
+	obj := cp.pool.Get()
 
-	channel := cp.pool.Get()
-	if channel == nil {
-		return nil, ErrChannelPoolClosed
+	if obj != nil {
+		if channel, ok := obj.(*amqp.Channel); ok && channel != nil {
+			return channel, nil
+		}
 	}
-	return channel.(*amqp.Channel), nil
+
+	conn, err := cp.connPool.Get()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get connection: %w", err)
+	}
+
+	channel, err := conn.CreateChannel()
+	if err != nil {
+		cp.connPool.Put(conn)
+		return nil, fmt.Errorf("failed to create channel: %w", err)
+	}
+
+	cp.connPool.Put(conn)
+	return channel, nil
 }
 
 func (cp *RabbitMQChannelPool) Put(channel *amqp.Channel) {
-	cp.pool.Put(channel)
+	if channel != nil {
+		cp.pool.Put(channel)
+	}
 }
 
 func (cp *RabbitMQChannelPool) Close() {

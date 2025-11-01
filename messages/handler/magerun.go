@@ -52,13 +52,14 @@ func (handler *MagerunHandler) ProcessMessage(messageBody string, correlationID 
 		}
 	}
 
-	// Publish the output to the RMQ/SQS output queue
 	publisherClass, err := publisher.MapPublisherToEngine()
 	if err != nil {
 		logger.Warnf("Error publishing message to RMQ/SQS queue: %s", err)
 	}
+
+	outputWithCommand := fmt.Sprintf("Command: %s\n\n%s", messageBody, output)
 	logger.Infof("Publishing output to queue: %s with correlation ID: %s", queues.MapQueueToOutputQueue(MageRunQueue), correlationID)
-	_, err = publisherClass.Publish(output, queues.MapQueueToOutputQueue(MageRunQueue), correlationID)
+	_, err = publisherClass.Publish(outputWithCommand, queues.MapQueueToOutputQueue(MageRunQueue), correlationID)
 	if err != nil {
 		return err
 	}
