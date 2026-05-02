@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.1](https://github.com/furan917/MageComm/compare/v0.2.0...v0.2.1) (2026-05-02)
+
+
+### Bug Fixes
+
+* helpful bug turned feature, make show:commands actually work ([c4c3ad6](https://github.com/furan917/MageComm/commit/c4c3ad63dddcb14ccec972093189eb8d17b31d8c))
+
 ## [0.2.0](https://github.com/furan917/MageComm/compare/v0.1.14...v0.2.0) (2025-11-01)
 
 
