@@ -48,15 +48,16 @@ var defaultAllowedCommands = []string{
 	"yotpo:sync",
 }
 
-func IsMageRunCommandAllowed(command string) (bool, error) {
-	var allowedCommands []string
-
+func GetAllowedMageRunCommands() []string {
 	allowedCommandsConfig := GetValue(CommandConfigAllowedMageRunCommands)
 	if allowedCommandsConfig != "" {
-		allowedCommands = strings.Split(allowedCommandsConfig, ",")
-	} else {
-		allowedCommands = defaultAllowedCommands
+		return strings.Split(allowedCommandsConfig, ",")
 	}
+	return defaultAllowedCommands
+}
+
+func IsMageRunCommandAllowed(command string) (bool, error) {
+	allowedCommands := GetAllowedMageRunCommands()
 
 	for _, allowedCommand := range allowedCommands {
 		if allowedCommand == command {

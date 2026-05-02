@@ -32,6 +32,10 @@ var MagerunCmd = &cobra.Command{
 		}
 
 		command := magerunArgs[0]
+		if command == "show:commands" {
+			fmt.Printf("Allowed magerun commands:\n%s\n", strings.Join(config_manager.GetAllowedMageRunCommands(), ",\n"))
+			return nil
+		}
 		if isCmdAllowed, err := config_manager.IsMageRunCommandAllowed(command); !isCmdAllowed {
 			return err
 		}
